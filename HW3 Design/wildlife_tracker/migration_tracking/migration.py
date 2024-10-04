@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 class Migration:
 
@@ -6,19 +6,20 @@ class Migration:
 
     def __init__(self,
                 migration_id: int, 
-                start_location: int, 
+                # start_location: int, 
                 current_date: str,
-                destination: int, 
+                # destination: int, 
                 current_location: str,
                 start_date: str, 
                 status: str = "Scheduled", 
-                duration: Optional[int] = None) -> None:
+                # duration: Optional[int] = None
+                ) -> None:
         self.migration_id = migration_id
-        self.start_location = start_location
-        self.destination = destination
+        # self.start_location = start_location
+        # self.destination = destination
         self.start_date = start_date
         self.status = status
-        self.duration = duration
+        # self.duration = duration
         self.current_date = current_date
         self.current_location = current_location
 
