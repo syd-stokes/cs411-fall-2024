@@ -5,8 +5,6 @@ from wildlife_tracker.animal_management.animal import Animal
 
 class HabitatManager:
 
-    #pass
-    
     def __init__(self) -> None:
         habitats: dict[int, Habitat] = {}
 
@@ -16,10 +14,7 @@ class HabitatManager:
     def get_habitat_by_id(habitat_id: int) -> Habitat:
         pass
 
-    # def get_habitat_details(habitat_id: int) -> dict:
-    #     pass
-
-    def assign_animals_to_habitat(animals: List[Animal]) -> None:
+    def assign_animals_to_habitat(habitat_id: int, animals: List[Animal]) -> None:
         pass
 
     def get_habitats_by_geographic_area(geographic_area: str) -> List[Habitat]:

@@ -1,17 +1,25 @@
-from typing import Optional
+from typing import Optional, Dict
 
 from wildlife_tracker.migration_tracking.migration import Migration
-from wildlife_tracker.migration_tracking.migration import MigrationPath
+from wildlife_tracker.migration_tracking.migration_path import MigrationPath
 from wildlife_tracker.habitat_management.habitat import Habitat
 
 class MigrationManager:
 
-    #pass
+    def __init__(self) -> None:
+        migrations: Dict[int, Migration] = {} 
+        paths: Dict[int, MigrationPath] = {}
     
     def cancel_migration(migration_id: int) -> None:
         pass
 
     def get_migration_by_id(migration_id: int) -> Migration:
+        pass
+
+    def remove_migration_path(path_id: int) -> None:
+        pass
+
+    def create_migration_path(species: str, start_location: Habitat, destination: Habitat, duration: Optional[int] = None) -> None:
         pass
 
     def get_migrations() -> list[Migration]:
