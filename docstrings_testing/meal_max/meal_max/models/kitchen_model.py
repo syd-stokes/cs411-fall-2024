@@ -28,13 +28,13 @@ class Meal:
 
 def create_meal(meal: str, cuisine: str, price: float, difficulty: str) -> None:
     """
-    Creates a new Meal in the (meals database?).
+    Creates a new Meal in the meals table.
 
     Args:
         meal (str): the name of the meal.
-        cuisine (str): the type or origin of the cuisine (e.g., Mexican, Italian).
+        cuisine (str): the type or origin of the cuisine (e.g., Mexican, Italian, Chinese).
         price (float): the cost of the meal.
-        difficulty (str): the preparation complexity or challenge level of the meal (categorized into three levels: 'LOW', 'MED', and 'HIGH')
+        difficulty (str): the preparation complexity level or difficulty of the meal ('LOW', 'MED', or 'HIGH')
 
     Raises:
         ValueError: If price or difficulty are invalid.
@@ -101,7 +101,7 @@ def delete_meal(meal_id: int) -> None:
 
 def get_leaderboard(sort_by: str="wins") -> dict[str, Any]:
     """
-    Retrieves the leaderboard of meals, sorted by either total wins or win percentage..
+    Retrieves the leaderboard of meals, sorted by either total wins or win percentage.
 
     Args:
         sort_by (str): The field to sort the leaderboard by ("wins" (default) or "win_pct").
@@ -155,13 +155,13 @@ def get_leaderboard(sort_by: str="wins") -> dict[str, Any]:
 
 def get_meal_by_id(meal_id: int) -> Meal:
     """
-    Retrieves a meal from the (catalog?) by its meal ID.
+    Retrieves a meal from the meal table by its meal ID.
 
     Args:
         meal_id (int): The ID of the meal to retrieve.
 
     Returns:
-        Meal: The Meal object corresponding to the meal_id.
+        Meal: The Meal object corresponding to the meal ID.
 
     Raises:
         ValueError: If the meal is not found or is marked as deleted.
@@ -189,13 +189,13 @@ def get_meal_by_id(meal_id: int) -> Meal:
 
 def get_meal_by_name(meal_name: str) -> Meal:
     """
-    Retrieves a meal from the (catalog?) by its name.
+    Retrieves a meal from the meal table by its name.
 
     Args:
-        meal_name (str): The name of the meal.
+        meal_name (str): The name of the meal to retrieve.
 
     Returns:
-        Meal: The meal object corresponding to the meal name.
+        Meal: The meal object corresponding to the specified meal name.
 
     Raises:
         ValueError: If the meal is not found or is marked as deleted.
@@ -227,7 +227,7 @@ def update_meal_stats(meal_id: int, result: str) -> None:
 
     Args:
         meal_id (int): The ID of the meal whose battle statistics should be updated.
-        result (str): The result of the battle for the meal (expected to be either "win" or "loss").
+        result (str): The result of the battle for the meal (expected either "win" or "loss").
 
     Raises:
         ValueError: If the meal does not exist or is marked as deleted; if result is invalid.
