@@ -32,10 +32,10 @@ def sample_meal(sample_meal1, sample_meal2):
 # Battle Management Test Cases
 ##################################################
 
-def test_battle_with_two_meals(battle_model, sample_meal, mock_update_meal_stats, mocker):
-    """Test a successful battle bewteen two meals."""
+def test_battle_with_two_meals(battle_model, sample_meals, mock_update_meal_stats, mocker):
+    """Test a successful battle between two meals."""
     # Assign sample meals to combatants
-    battle_model.combatants = sample_meal
+    battle_model.combatants = sample_meals
     
     # Mock `get_battle_score` to provide predictable scores
     mocker.patch.object(battle_model, 'get_battle_score', side_effect=[75, 70])
@@ -46,11 +46,11 @@ def test_battle_with_two_meals(battle_model, sample_meal, mock_update_meal_stats
     winner = battle_model.battle()
 
     # Ensure battle completed and returned the correct winner
-    assert winner in [sample_meal[0].meal, sample_meal[1].meal]
+    assert winner in [sample_meals[0].meal, sample_meals[1].meal]
 
     # Verify `update_meal_stats` calls for win/loss
-    mock_update_meal_stats.assert_any_call(sample_meal[0].id, 'win')
-    mock_update_meal_stats.assert_any_call(sample_meal[1].id, 'loss')
+    mock_update_meal_stats.assert_any_call(sample_meals[0].id, 'win')
+    mock_update_meal_stats.assert_any_call(sample_meals[1].id, 'loss')
 
     # Confirm the loser was removed from the combatants list
     remaining_combatant = battle_model.combatants[0]
@@ -65,27 +65,27 @@ def test_battle_with_insufficient_combatants(battle_model):
     with pytest.raises(ValueError, match="Two combatants must be prepped for a battle."):
         battle_model.battle()
 
-def test_battle_random_number_influence(battle_model, sample_meal, mocker):
+def test_battle_random_number_influence(battle_model, sample_meals, mocker):
     """Test how random number and score delta influence the battle outcome."""
     # Assign sample meals to combatants
-    battle_model.combatants = sample_meal
+    battle_model.combatants = sample_meals
     
     # Case where delta is greater than the random number (combatant 1 wins)
     mocker.patch.object(battle_model, 'get_battle_score', side_effect=[90, 80])
     mocker.patch("meal_max.models.battle_model.get_random", return_value=0.1)
 
     winner = battle_model.battle()
-    assert winner == sample_meal[0].meal
+    assert winner == sample_meals[0].meal
     
     # Reset combatants for the next test case
-    battle_model.combatants = sample_meal
+    battle_model.combatants = sample_meals
 
     # Case where delta is less than the random number (combatant 2 wins)
     mocker.patch.object(battle_model, 'get_battle_score', side_effect=[80, 90])
     mocker.patch("meal_max.models.battle_model.get_random", return_value=0.5)
 
     winner = battle_model.battle()
-    assert winner == sample_meal[1].meal
+    assert winner == sample_meals[1].meal
 
 
 ##################################################
@@ -94,11 +94,10 @@ def test_battle_random_number_influence(battle_model, sample_meal, mocker):
 
 def test_get_battle_score(battle_model, sample_meal1):
     """Test successfully retrieving the battle score from the given meal combatant."""
-    battle_model.combatants = [sample_meal1]
-
     retrieved_score = battle_model.get_battle_score(sample_meal1)
+    expected_score = (sample_meal1.price * len(sample_meal1.cuisine)) - 3
+    assert retrieved_score == expected_score, f"Expected score of {expected_score}, got {retrieved_score}"
 
-    assert retrieved_score == (sample_meal1.price * len(sample_meal1.cuisine)) - 3
 
 
 ##################################################
