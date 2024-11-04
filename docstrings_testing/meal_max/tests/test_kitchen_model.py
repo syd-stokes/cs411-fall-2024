@@ -52,9 +52,9 @@ def mock_cursor(mocker):
 ######################################################
 
 def test_create_meal(mock_cursor):
-    """Test creating a new song in the catalog."""
+    """Test creating a new meal in the table."""
 
-    # Call the function to create a new song
+    # Call the function to create a new meal
     create_meal(meal="Pasta", cuisine="Italian", price=20.00, difficulty="LOW")
 
     expected_query = normalize_whitespace("""
@@ -85,20 +85,20 @@ def test_create_meal_duplicate(mock_cursor):
         create_meal(meal="Pasta", cuisine="Italian", price=25.00, difficulty="MED")
 
 def test_create_meal_invalid_price():
-    """Test error when trying to create a song with an invalid price (e.g., negative price)"""
+    """Test error when trying to create a meal with an invalid price (e.g., negative price)"""
 
-    # Attempt to create a song with a negative duration
+    # Attempt to create a meal with a negative price
     with pytest.raises(ValueError, match="Invalid price: -10. Price must be a positive number"):
         create_meal("Test Meal", "Italian", -10, "MED")
 
-    # Attempt to create a song with a non-integer duration
+    # Attempt to create a meal with a non-integer price
     with pytest.raises(ValueError, match="Invalid price: INVALID. Price must be a positive number"):
         create_meal("Test Meal", "Italian", "INVALID", "MED")
 
 
 
 def test_create_meal_invalid_difficulty():
-    """Test error when trying to create a song with an invalid year (e.g., less than 1900 or non-integer)."""
+    """Test error when trying to create a meal with an invalid difficulty (e.g., neither 'LOW', 'MED', or 'HIGH')."""
 
     # Attempt to create a meal with a difficulty not set to Low medium or high.  
     with pytest.raises(ValueError, match="Invalid difficulty level: EASY. Must be 'LOW', 'MED', or 'HIGH'"):
@@ -106,12 +106,12 @@ def test_create_meal_invalid_difficulty():
 
 
 def test_delete_meal(mock_cursor):
-    """Test soft deleting a song from the catalog by song ID."""
+    """Test soft deleting a meal from the table by meal ID."""
 
-    # Simulate that the song exists (id = 1)
+    # Simulate that the meal exists (id = 1)
     mock_cursor.fetchone.return_value = ([False])
 
-    # Call the delete_song function
+    # Call the delete_meal function
     delete_meal(1)
 
     # Normalize the SQL for both queries (SELECT and UPDATE)
@@ -181,7 +181,7 @@ def test_clear_meals(mock_cursor, mocker):
 ######################################################
 
 def test_get_meal_by_id(mock_cursor):
-    # Simulate that the song exists (id = 1)
+    # Simulate that the meal exists (id = 1)
     mock_cursor.fetchone.return_value = (1, "Pasta", "Italian", 20.00, "LOW", False)
 
     # Call the function and check the result
@@ -211,7 +211,7 @@ def test_get_meal_by_id_bad_id(mock_cursor):
     # Simulate that no meal exists for the given ID
     mock_cursor.fetchone.return_value = None
 
-    # Expect a ValueError when the song is not found
+    # Expect a ValueError when the meal is not found
     with pytest.raises(ValueError, match="Meal with ID 999 not found"):
         get_meal_by_id(999)
 

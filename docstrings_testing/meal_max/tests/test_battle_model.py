@@ -10,11 +10,11 @@ def battle_model():
     return BattleModel()
 
 @pytest.fixture
-def mock_update_play_count(mocker):
-    """Mock the update_play_count function for testing purposes."""
+def mock_update_meal_stats(mocker):
+    """Mock the update_meal_stats function for testing purposes."""
     return mocker.patch("meal_max.models.battle_model.update_meal_stats")
 
-"""Fixtures providing sample songs for the tests."""
+"""Fixtures providing sample meals for the tests."""
 @pytest.fixture
 def sample_meal1():
     return Meal(1, 'Meal 1', 'Cuisine 1', 20.00, 'LOW')
@@ -27,12 +27,13 @@ def sample_meal2():
 def sample_meal(sample_meal1, sample_meal2):
     return [sample_meal1, sample_meal2]
 
+
 ##################################################
-# Add Meal Management Test Cases
+# Battle Management Test Cases
 ##################################################
 
-
-def test_battle_with_two_meals(battle_model, sample_meal, mock_update_play_count, mocker):
+def test_battle_with_two_meals(battle_model, sample_meal, mock_update_meal_stats, mocker):
+    """Test a successful battle bewteen two meals."""
     # Assign sample meals to combatants
     battle_model.combatants = sample_meal
     
@@ -48,8 +49,8 @@ def test_battle_with_two_meals(battle_model, sample_meal, mock_update_play_count
     assert winner in [sample_meal[0].meal, sample_meal[1].meal]
 
     # Verify `update_meal_stats` calls for win/loss
-    mock_update_play_count.assert_any_call(sample_meal[0].id, 'win')
-    mock_update_play_count.assert_any_call(sample_meal[1].id, 'loss')
+    mock_update_meal_stats.assert_any_call(sample_meal[0].id, 'win')
+    mock_update_meal_stats.assert_any_call(sample_meal[1].id, 'loss')
 
     # Confirm the loser was removed from the combatants list
     remaining_combatant = battle_model.combatants[0]
@@ -57,13 +58,15 @@ def test_battle_with_two_meals(battle_model, sample_meal, mock_update_play_count
     assert remaining_combatant.meal == winner
 
 def test_battle_with_insufficient_combatants(battle_model):
+    """Test error when only one combatant tries to battle."""
     # Only one combatant in the list
     battle_model.combatants = [Meal(1, 'Single Meal', 'Cuisine', 10.00, 'LOW')]
     
     with pytest.raises(ValueError, match="Two combatants must be prepped for a battle."):
         battle_model.battle()
 
-def test_battle_random_number_influence(battle_model, sample_meal, mock_update_play_count, mocker):
+def test_battle_random_number_influence(battle_model, sample_meal, mocker):
+    """Test how random number and score delta influence the battle outcome."""
     # Assign sample meals to combatants
     battle_model.combatants = sample_meal
     
@@ -85,275 +88,83 @@ def test_battle_random_number_influence(battle_model, sample_meal, mock_update_p
     assert winner == sample_meal[1].meal
 
 
-
-def test_add_duplicate_song_to_playlist(playlist_model, sample_song1):
-    """Test error when adding a duplicate song to the playlist by ID."""
-    playlist_model.add_song_to_playlist(sample_song1)
-    with pytest.raises(ValueError, match="Song with ID 1 already exists in the playlist"):
-        playlist_model.add_song_to_playlist(sample_song1)
-
 ##################################################
-# Remove Song Management Test Cases
+# Meal Retrieval Test Cases
 ##################################################
 
-def test_remove_song_from_playlist_by_song_id(playlist_model, sample_playlist):
-    """Test removing a song from the playlist by song_id."""
-    playlist_model.playlist.extend(sample_playlist)
-    assert len(playlist_model.playlist) == 2
+def test_get_battle_score(battle_model, sample_meal1):
+    """Test successfully retrieving the battle score from the given meal combatant."""
+    battle_model.combatants = [sample_meal1]
 
-    playlist_model.remove_song_by_song_id(1)
-    assert len(playlist_model.playlist) == 1, f"Expected 1 song, but got {len(playlist_model.playlist)}"
-    assert playlist_model.playlist[0].id == 2, "Expected song with id 2 to remain"
+    retrieved_score = battle_model.get_battle_score(sample_meal1)
 
-def test_remove_song_by_track_number(playlist_model, sample_playlist):
-    """Test removing a song from the playlist by track number."""
-    playlist_model.playlist.extend(sample_playlist)
-    assert len(playlist_model.playlist) == 2
+    assert retrieved_score == (sample_meal1.price * len(sample_meal1.cuisine)) - 3
 
-    # Remove song at track number 1 (first song)
-    playlist_model.remove_song_by_track_number(1)
-    assert len(playlist_model.playlist) == 1, f"Expected 1 song, but got {len(playlist_model.playlist)}"
-    assert playlist_model.playlist[0].id == 2, "Expected song with id 2 to remain"
-
-def test_clear_playlist(playlist_model, sample_song1):
-    """Test clearing the entire playlist."""
-    playlist_model.add_song_to_playlist(sample_song1)
-
-    playlist_model.clear_playlist()
-    assert len(playlist_model.playlist) == 0, "Playlist should be empty after clearing"
-
-def test_clear_playlist_empty_playlist(playlist_model, caplog):
-    """Test clearing the entire playlist when it's empty."""
-    playlist_model.clear_playlist()
-    assert len(playlist_model.playlist) == 0, "Playlist should be empty after clearing"
-    assert "Clearing an empty playlist" in caplog.text, "Expected warning message when clearing an empty playlist"
 
 ##################################################
-# Tracklisting Management Test Cases
+# Combatant Management Functions
 ##################################################
 
-def test_move_song_to_track_number(playlist_model, sample_playlist):
-    """Test moving a song to a specific track number in the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_clear_singular_combatant(battle_model, sample_meal1):
+    """Test clearing the combatants list of len 1."""
+    battle_model.combatants = [sample_meal1]
 
-    playlist_model.move_song_to_track_number(2, 1)  # Move Song 2 to the first position
-    assert playlist_model.playlist[0].id == 2, "Expected Song 2 to be in the first position"
-    assert playlist_model.playlist[1].id == 1, "Expected Song 1 to be in the second position"
+    battle_model.clear_combatants()
+    assert len(battle_model.combatants) == 0, "Combatants list should be empty after clearing"
 
-def test_swap_songs_in_playlist(playlist_model, sample_playlist):
-    """Test swapping the positions of two songs in the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_clear_multiple_combatants(battle_model, sample_meal1, sample_meal2):
+    """Test clearing the entire combatants list of len > 1."""
+    battle_model.combatants = [sample_meal1, sample_meal2]
 
-    playlist_model.swap_songs_in_playlist(1, 2)  # Swap positions of Song 1 and Song 2
-    assert playlist_model.playlist[0].id == 2, "Expected Song 2 to be in the first position"
-    assert playlist_model.playlist[1].id == 1, "Expected Song 1 to be in the second position"
+    battle_model.clear_combatants()
+    assert len(battle_model.combatants) == 0, "Combatants list should be empty after clearing"
 
-def test_swap_song_with_itself(playlist_model, sample_song1):
-    """Test swapping the position of a song with itself raises an error."""
-    playlist_model.add_song_to_playlist(sample_song1)
+def test_clear_empty_combatant(battle_model):
+    """Test clearing the empty combatants list of len = 0."""
+    battle_model.combatants = []
 
-    with pytest.raises(ValueError, match="Cannot swap a song with itself"):
-        playlist_model.swap_songs_in_playlist(1, 1)  # Swap positions of Song 1 with itself
+    battle_model.clear_combatants()
+    assert len(battle_model.combatants) == 0, "Combatants list should be empty after clearing"
 
-def test_move_song_to_end(playlist_model, sample_playlist):
-    """Test moving a song to the end of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_get_all_combatants_multiple(battle_model, sample_meal1, sample_meal2):
+    """Test successfully retrieving all combatants from the list."""
+    battle_model.combatants = [sample_meal1, sample_meal2]
 
-    playlist_model.move_song_to_end(1)  # Move Song 1 to the end
-    assert playlist_model.playlist[1].id == 1, "Expected Song 1 to be at the end"
+    all_combatants = battle_model.get_combatants()
+    assert len(all_combatants) == 2
+    assert all_combatants[0].id == 1
+    assert all_combatants[1].id == 2
 
-def test_move_song_to_beginning(playlist_model, sample_playlist):
-    """Test moving a song to the beginning of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_get_all_combatants_singular(battle_model, sample_meal1):
+    """Test successfully retrieving all combatants from the list of len 1."""
+    battle_model.combatants = [sample_meal1]
 
-    playlist_model.move_song_to_beginning(2)  # Move Song 2 to the beginning
-    assert playlist_model.playlist[0].id == 2, "Expected Song 2 to be at the beginning"
+    all_combatants = battle_model.get_combatants()
+    assert len(all_combatants) == 1
+    assert all_combatants[0].id == 1
 
-##################################################
-# Song Retrieval Test Cases
-##################################################
+def test_prep_two_combatants(battle_model, sample_meal1, sample_meal2):
+    """Test successfully prepping all combatants from the list of len 2."""
+    battle_model.prep_combatant(sample_meal1)
+    battle_model.prep_combatant(sample_meal2)
+    
+    assert len(battle_model.combatants) == 2
+    assert battle_model.combatants == [sample_meal1, sample_meal2]
 
-def test_get_song_by_track_number(playlist_model, sample_playlist):
-    """Test successfully retrieving a song from the playlist by track number."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_prep_one_combatant(battle_model, sample_meal1):
+    """Test successfully prepping one combatant."""
+    battle_model.prep_combatant(sample_meal1)
+    
+    assert len(battle_model.combatants) == 1
+    assert battle_model.combatants == [sample_meal1]
 
-    retrieved_song = playlist_model.get_song_by_track_number(1)
-    assert retrieved_song.id == 1
-    assert retrieved_song.title == 'Song 1'
-    assert retrieved_song.artist == 'Artist 1'
-    assert retrieved_song.year == 2022
-    assert retrieved_song.duration == 180
-    assert retrieved_song.genre == 'Pop'
-
-def test_get_all_songs(playlist_model, sample_playlist):
-    """Test successfully retrieving all songs from the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-
-    all_songs = playlist_model.get_all_songs()
-    assert len(all_songs) == 2
-    assert all_songs[0].id == 1
-    assert all_songs[1].id == 2
-
-def test_get_song_by_song_id(playlist_model, sample_song1):
-    """Test successfully retrieving a song from the playlist by song ID."""
-    playlist_model.add_song_to_playlist(sample_song1)
-
-    retrieved_song = playlist_model.get_song_by_song_id(1)
-
-    assert retrieved_song.id == 1
-    assert retrieved_song.title == 'Song 1'
-    assert retrieved_song.artist == 'Artist 1'
-    assert retrieved_song.year == 2022
-    assert retrieved_song.duration == 180
-    assert retrieved_song.genre == 'Pop'
-
-def test_get_current_song(playlist_model, sample_playlist):
-    """Test successfully retrieving the current song from the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-
-    current_song = playlist_model.get_current_song()
-    assert current_song.id == 1
-    assert current_song.title == 'Song 1'
-    assert current_song.artist == 'Artist 1'
-    assert current_song.year == 2022
-    assert current_song.duration == 180
-    assert current_song.genre == 'Pop'
-
-def test_get_playlist_length(playlist_model, sample_playlist):
-    """Test getting the length of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-    assert playlist_model.get_playlist_length() == 2, "Expected playlist length to be 2"
-
-def test_get_playlist_duration(playlist_model, sample_playlist):
-    """Test getting the total duration of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-    assert playlist_model.get_playlist_duration() == 335, "Expected playlist duration to be 360 seconds"
-
-##################################################
-# Utility Function Test Cases
-##################################################
-
-def test_check_if_empty_non_empty_playlist(playlist_model, sample_song1):
-    """Test check_if_empty does not raise error if playlist is not empty."""
-    playlist_model.add_song_to_playlist(sample_song1)
-    try:
-        playlist_model.check_if_empty()
-    except ValueError:
-        pytest.fail("check_if_empty raised ValueError unexpectedly on non-empty playlist")
-
-def test_check_if_empty_empty_playlist(playlist_model):
-    """Test check_if_empty raises error when playlist is empty."""
-    playlist_model.clear_playlist()
-    with pytest.raises(ValueError, match="Playlist is empty"):
-        playlist_model.check_if_empty()
-
-def test_validate_song_id(playlist_model, sample_song1):
-    """Test validate_song_id does not raise error for valid song ID."""
-    playlist_model.add_song_to_playlist(sample_song1)
-    try:
-        playlist_model.validate_song_id(1)
-    except ValueError:
-        pytest.fail("validate_song_id raised ValueError unexpectedly for valid song ID")
-
-def test_validate_song_id_no_check_in_playlist(playlist_model):
-    """Test validate_song_id does not raise error for valid song ID when the id isn't in the playlist."""
-    try:
-        playlist_model.validate_song_id(1, check_in_playlist=False)
-    except ValueError:
-        pytest.fail("validate_song_id raised ValueError unexpectedly for valid song ID")
-
-def test_validate_song_id_invalid_id(playlist_model):
-    """Test validate_song_id raises error for invalid song ID."""
-    with pytest.raises(ValueError, match="Invalid song id: -1"):
-        playlist_model.validate_song_id(-1)
-
-    with pytest.raises(ValueError, match="Invalid song id: invalid"):
-        playlist_model.validate_song_id("invalid")
-
-def test_validate_track_number(playlist_model, sample_song1):
-    """Test validate_track_number does not raise error for valid track number."""
-    playlist_model.add_song_to_playlist(sample_song1)
-    try:
-        playlist_model.validate_track_number(1)
-    except ValueError:
-        pytest.fail("validate_track_number raised ValueError unexpectedly for valid track number")
-
-def test_validate_track_number_invalid(playlist_model, sample_song1):
-    """Test validate_track_number raises error for invalid track number."""
-    playlist_model.add_song_to_playlist(sample_song1)
-
-    with pytest.raises(ValueError, match="Invalid track number: 0"):
-        playlist_model.validate_track_number(0)
-
-    with pytest.raises(ValueError, match="Invalid track number: 2"):
-        playlist_model.validate_track_number(2)
-
-    with pytest.raises(ValueError, match="Invalid track number: invalid"):
-        playlist_model.validate_track_number("invalid")
-
-##################################################
-# Playback Test Cases
-##################################################
-
-def test_play_current_song(playlist_model, sample_playlist, mock_update_play_count):
-    """Test playing the current song."""
-    playlist_model.playlist.extend(sample_playlist)
-
-    playlist_model.play_current_song()
-
-    # Assert that CURRENT_TRACK_NUMBER has been updated to 2
-    assert playlist_model.current_track_number == 2, f"Expected track number to be 2, but got {playlist_model.current_track_number}"
-
-    # Assert that update_play_count was called with the id of the first song
-    mock_update_play_count.assert_called_once_with(1)
-
-    # Get the second song from the iterator (which will increment CURRENT_TRACK_NUMBER back to 1)
-    playlist_model.play_current_song()
-
-    # Assert that CURRENT_TRACK_NUMBER has been updated back to 1
-    assert playlist_model.current_track_number == 1, f"Expected track number to be 1, but got {playlist_model.current_track_number}"
-
-    # Assert that update_play_count was called with the id of the second song
-    mock_update_play_count.assert_called_with(2)
-
-def test_rewind_playlist(playlist_model, sample_playlist):
-    """Test rewinding the iterator to the beginning of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-    playlist_model.current_track_number = 2
-
-    playlist_model.rewind_playlist()
-    assert playlist_model.current_track_number == 1, "Expected to rewind to the first track"
-
-def test_go_to_track_number(playlist_model, sample_playlist):
-    """Test moving the iterator to a specific track number in the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-
-    playlist_model.go_to_track_number(2)
-    assert playlist_model.current_track_number == 2, "Expected to be at track 2 after moving song"
-
-def test_play_entire_playlist(playlist_model, sample_playlist, mock_update_play_count):
-    """Test playing the entire playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-
-    playlist_model.play_entire_playlist()
-
-    # Check that all play counts were updated
-    mock_update_play_count.assert_any_call(1)
-    mock_update_play_count.assert_any_call(2)
-    assert mock_update_play_count.call_count == len(playlist_model.playlist)
-
-    # Check that the current track number was updated back to the first song
-    assert playlist_model.current_track_number == 1, "Expected to loop back to the beginning of the playlist"
-
-def test_play_rest_of_playlist(playlist_model, sample_playlist, mock_update_play_count):
-    """Test playing from the current position to the end of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-    playlist_model.current_track_number = 2
-
-    playlist_model.play_rest_of_playlist()
-
-    # Check that play counts were updated for the remaining songs
-    mock_update_play_count.assert_any_call(2)
-    assert mock_update_play_count.call_count == 1
-
-    assert playlist_model.current_track_number == 1, "Expected to loop back to the beginning of the playlist"
+def test_prep_three_combatants(battle_model, sample_meal1, sample_meal2):
+    """Test error when trying to prep and add a third combatant."""
+    battle_model.prep_combatant(sample_meal1)
+    battle_model.prep_combatant(sample_meal2)
+    
+    assert len(battle_model.combatants) == 2, "There should be exactly two combatants prepped."
+    assert battle_model.combatants == [sample_meal1, sample_meal2], "Combatants list does not match expected entries."
+    
+    with pytest.raises(ValueError, match="Combatant list is full, cannot add more combatants."):
+        battle_model.prep_combatant(Meal(3, 'Meal 3', 'Cuisine 3', 15.00, 'HIGH'))
