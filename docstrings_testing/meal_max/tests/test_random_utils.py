@@ -5,7 +5,6 @@ from meal_max.utils.random_utils import get_random
 
 
 RANDOM_NUMBER = 42
-NUM_MEALS = 100
 
 @pytest.fixture
 def mock_random_org(mocker):
