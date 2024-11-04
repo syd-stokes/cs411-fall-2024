@@ -107,7 +107,7 @@ get_all_songs() {
 
 get_song_by_id() {
   song_id=$1
-
+  
   echo "Getting song by ID ($song_id)..."
   response=$(curl -s -X GET "$BASE_URL/get-song-from-catalog-by-id/$song_id")
   if echo "$response" | grep -q '"status": "success"'; then

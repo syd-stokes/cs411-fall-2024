@@ -125,7 +125,7 @@ class BattleModel:
         """
         logger.info("Clearing the combatants list.")
         self.combatants.clear()
-
+        
     def get_combatants(self) -> List[Meal]:
         """
         Retrieves a list of all meals currently set as combatants.

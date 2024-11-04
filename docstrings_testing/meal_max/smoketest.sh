@@ -142,6 +142,21 @@ clear_combatants() {
   fi
 }
 
+get_combatants() {
+  echo "Getting all combatants..."
+  response=$(curl -s -X GET "$BASE_URL/get-all-combatants")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "All combatants retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Combatants JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get combatants."
+    exit 1
+  fi
+}
+
 
 # ############################################################
 # #
