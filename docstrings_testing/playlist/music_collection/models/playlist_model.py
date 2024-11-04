@@ -23,7 +23,7 @@ class PlaylistModel:
         """
         self.current_track_number = 1
         self.playlist: List[Song] = []
-
+        
     ##################################################
     # Song Management Functions
     ##################################################
