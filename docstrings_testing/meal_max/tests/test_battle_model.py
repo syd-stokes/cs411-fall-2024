@@ -24,7 +24,7 @@ def sample_meal2():
     return Meal(2, 'Meal 2', 'Cuisine 2', 25.00, 'MED')
 
 @pytest.fixture
-def sample_meal(sample_meal1, sample_meal2):
+def sample_meals(sample_meal1, sample_meal2):
     return [sample_meal1, sample_meal2]
 
 
@@ -32,60 +32,78 @@ def sample_meal(sample_meal1, sample_meal2):
 # Battle Management Test Cases
 ##################################################
 
-def test_battle_with_two_meals(battle_model, sample_meals, mock_update_meal_stats, mocker):
-    """Test a successful battle between two meals."""
-    # Assign sample meals to combatants
-    battle_model.combatants = sample_meals
+def test_battle_meal1_wins(battle_model, sample_meal1, sample_meal2, mock_update_meal_stats, mocker):
+    """Test a scenario where sample_meal1 successfully wins the battle."""
+    battle_model.combatants = [sample_meal1, sample_meal2]
     
-    # Mock `get_battle_score` to provide predictable scores
-    mocker.patch.object(battle_model, 'get_battle_score', side_effect=[75, 70])
-    
-    # Mock `get_random` to return a controlled value
-    mocker.patch("meal_max.models.battle_model.get_random", return_value=0.1)
+    # Mock scores to make sample_meal1 win
+    mocker.patch.object(battle_model, 'get_battle_score', side_effect=[90, 85])
+    mocker.patch("meal_max.models.battle_model.get_random", return_value=0.02)
     
     winner = battle_model.battle()
-
-    # Ensure battle completed and returned the correct winner
-    assert winner in [sample_meals[0].meal, sample_meals[1].meal]
-
-    # Verify `update_meal_stats` calls for win/loss
-    mock_update_meal_stats.assert_any_call(sample_meals[0].id, 'win')
-    mock_update_meal_stats.assert_any_call(sample_meals[1].id, 'loss')
-
-    # Confirm the loser was removed from the combatants list
-    remaining_combatant = battle_model.combatants[0]
+    assert winner == sample_meal1.meal, f"Expected winner to be {sample_meal1.meal}, but got {winner}"
+    mock_update_meal_stats.assert_any_call(sample_meal1.id, 'win')
+    mock_update_meal_stats.assert_any_call(sample_meal2.id, 'loss')
     assert len(battle_model.combatants) == 1
-    assert remaining_combatant.meal == winner
+    assert battle_model.combatants[0] == sample_meal1
 
-def test_battle_with_insufficient_combatants(battle_model):
+def test_battle_meal2_wins(battle_model, sample_meal1, sample_meal2, mock_update_meal_stats, mocker):
+    """Test a scenario where sample_meal2 succesfully wins the battle."""
+    battle_model.combatants = [sample_meal1, sample_meal2]
+    
+    # Mock scores to make sample_meal2 win
+    mocker.patch.object(battle_model, 'get_battle_score', side_effect=[85, 90])
+    mocker.patch("meal_max.models.battle_model.get_random", return_value=0.05)
+    
+    winner = battle_model.battle()
+    assert winner == sample_meal2.meal, f"Expected winner to be {sample_meal2.meal}, but got {winner}"
+    mock_update_meal_stats.assert_any_call(sample_meal2.id, 'win')
+    mock_update_meal_stats.assert_any_call(sample_meal1.id, 'loss')
+    assert len(battle_model.combatants) == 1
+    assert battle_model.combatants[0] == sample_meal2
+
+def test_battle_with_insufficient_combatants(battle_model, sample_meal1):
     """Test error when only one combatant tries to battle."""
     # Only one combatant in the list
-    battle_model.combatants = [Meal(1, 'Single Meal', 'Cuisine', 10.00, 'LOW')]
+    battle_model.combatants = [sample_meal1]
     
     with pytest.raises(ValueError, match="Two combatants must be prepped for a battle."):
         battle_model.battle()
 
-def test_battle_random_number_influence(battle_model, sample_meals, mocker):
-    """Test how random number and score delta influence the battle outcome."""
-    # Assign sample meals to combatants
-    battle_model.combatants = sample_meals
-    
-    # Case where delta is greater than the random number (combatant 1 wins)
-    mocker.patch.object(battle_model, 'get_battle_score', side_effect=[90, 80])
-    mocker.patch("meal_max.models.battle_model.get_random", return_value=0.1)
+# def test_battle_random_number_influence(battle_model, sample_meals, mocker):
+#     """Test how random number and score delta influence the battle outcome."""
 
-    winner = battle_model.battle()
-    assert winner == sample_meals[0].meal
-    
-    # Reset combatants for the next test case
-    battle_model.combatants = sample_meals
+#     # Set up combatants
+#     battle_model.combatants = sample_meals
 
-    # Case where delta is less than the random number (combatant 2 wins)
-    mocker.patch.object(battle_model, 'get_battle_score', side_effect=[80, 90])
-    mocker.patch("meal_max.models.battle_model.get_random", return_value=0.5)
+#     # Mock `update_meal_stats` to avoid database access entirely
+#     mock_update_meal_stats = mocker.patch("meal_max.models.kitchen_model.update_meal_stats")
 
-    winner = battle_model.battle()
-    assert winner == sample_meals[1].meal
+#     # Mock `get_battle_score` and `get_random` for two scenarios
+#     # Scenario 1: combatant 1 should win
+#     mocker.patch.object(battle_model, 'get_battle_score', side_effect=[90, 80])
+#     mocker.patch("meal_max.models.battle_model.get_random", return_value=0.1)
+
+#     winner = battle_model.battle()
+#     assert winner == sample_meals[0].meal, "Expected combatant 1 to win when delta > random number"
+
+#     # Confirm `update_meal_stats` called correctly
+#     mock_update_meal_stats.assert_any_call(sample_meals[0].id, 'win')
+#     mock_update_meal_stats.assert_any_call(sample_meals[1].id, 'loss')
+
+#     # Reset combatants for the next scenario
+#     battle_model.combatants = sample_meals
+
+#     # Scenario 2: combatant 2 should win
+#     mocker.patch.object(battle_model, 'get_battle_score', side_effect=[80, 90])
+#     mocker.patch("meal_max.models.battle_model.get_random", return_value=0.5)
+
+#     winner = battle_model.battle()
+#     assert winner == sample_meals[1].meal, "Expected combatant 2 to win when delta < random number"
+
+#     # Confirm `update_meal_stats` called correctly again
+#     mock_update_meal_stats.assert_any_call(sample_meals[1].id, 'win')
+#     mock_update_meal_stats.assert_any_call(sample_meals[0].id, 'loss')
 
 
 ##################################################
