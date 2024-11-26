@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 
 from playlist.movie_collection.models import movie_model
-from playlist.movie_collection.models.watchlist_model import PlaylistModel
+from playlist.movie_collection.models.watchlist_model import WatchlistModel
 from movie_collection.utils.sql_utils import check_database_connection, check_table_exists
 
 
@@ -11,7 +11,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-playlist_model = PlaylistModel()
+watchlist_model = WatchlistModel()
 
 
 ####################################################
@@ -35,7 +35,7 @@ def healthcheck() -> Response:
 @app.route('/api/db-check', methods=['GET'])
 def db_check() -> Response:
     """
-    Route to check if the database connection and songs table are functional.
+    Route to check if the database connection and movies table are functional.
 
     Returns:
         JSON response indicating the database health status.
@@ -46,9 +46,9 @@ def db_check() -> Response:
         app.logger.info("Checking database connection...")
         check_database_connection()
         app.logger.info("Database connection is OK.")
-        app.logger.info("Checking if songs table exists...")
-        check_table_exists("songs")
-        app.logger.info("songs table exists.")
+        app.logger.info("Checking if movies table exists...")
+        check_table_exists("movies")
+        app.logger.info("movies table exists.")
         return make_response(jsonify({'database_status': 'healthy'}), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 404)
@@ -56,150 +56,152 @@ def db_check() -> Response:
 
 ##########################################################
 #
-# Song Management
+# Movie Management
 #
 ##########################################################
 
-@app.route('/api/create-song', methods=['POST'])
-def add_song() -> Response:
+@app.route('/api/create-movie', methods=['POST'])
+def add_movie() -> Response:
     """
-    Route to add a new song to the playlist.
+    Route to add a new movie to the watchlist.
 
     Expected JSON Input:
-        - artist (str): The artist's name.
-        - title (str): The song title.
-        - year (int): The year the song was released.
-        - genre (str): The genre of the song.
-        - duration (int): The duration of the song in seconds.
+        - director (str): The director's name.
+        - title (str): The movie title.
+        - year (int): The year the movie was released.
+        - genre (str): The genre of the movie.
+        - duration (int): The duration of the movie in minutes.
+        - rating (float): The IMDb movie rating.
 
     Returns:
-        JSON response indicating the success of the song addition.
+        JSON response indicating the success of the movie addition.
     Raises:
         400 error if input validation fails.
-        500 error if there is an issue adding the song to the playlist.
+        500 error if there is an issue adding the movie to the watchlist.
     """
-    app.logger.info('Adding a new song to the catalog')
+    app.logger.info('Adding a new movie to the catalog')
     try:
         data = request.get_json()
 
-        artist = data.get('artist')
+        director = data.get('director')
         title = data.get('title')
         year = data.get('year')
         genre = data.get('genre')
         duration = data.get('duration')
+        rating = data.get('rating')
 
-        if not artist or not title or year is None or not genre or duration is None:
+        if not director or not title or year is None or not genre or duration is None or rating is None:
             return make_response(jsonify({'error': 'Invalid input, all fields are required with valid values'}), 400)
 
-        # Add the song to the playlist
-        app.logger.info('Adding song: %s - %s', artist, title)
-        movie_model.create_song(artist=artist, title=title, year=year, genre=genre, duration=duration)
-        app.logger.info("Song added to playlist: %s - %s", artist, title)
-        return make_response(jsonify({'status': 'success', 'song': title}), 201)
+        # Add the movie to the watchlist
+        app.logger.info('Adding movie: %s - %s', director, title)
+        movie_model.create_movie(director=director, title=title, year=year, genre=genre, duration=duration, rating=rating)
+        app.logger.info("Movie added to watchlist: %s - %s", director, title)
+        return make_response(jsonify({'status': 'success', 'movie': title}), 201)
     except Exception as e:
-        app.logger.error("Failed to add song: %s", str(e))
+        app.logger.error("Failed to add movie: %s", str(e))
         return make_response(jsonify({'error': str(e)}), 500)
 
 @app.route('/api/clear-catalog', methods=['DELETE'])
 def clear_catalog() -> Response:
     """
-    Route to clear the entire song catalog (recreates the table).
+    Route to clear the entire movie catalog (recreates the table).
 
     Returns:
         JSON response indicating success of the operation or error message.
     """
     try:
-        app.logger.info("Clearing the song catalog")
+        app.logger.info("Clearing the movie catalog")
         movie_model.clear_catalog()
         return make_response(jsonify({'status': 'success'}), 200)
     except Exception as e:
         app.logger.error(f"Error clearing catalog: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/delete-song/<int:song_id>', methods=['DELETE'])
-def delete_song(song_id: int) -> Response:
+@app.route('/api/delete-movie/<int:movie_id>', methods=['DELETE'])
+def delete_movie(movie_id: int) -> Response:
     """
-    Route to delete a song by its ID (soft delete).
+    Route to delete a movie by its ID (soft delete).
 
     Path Parameter:
-        - song_id (int): The ID of the song to delete.
+        - movie_id (int): The ID of the movie to delete.
 
     Returns:
         JSON response indicating success of the operation or error message.
     """
     try:
-        app.logger.info(f"Deleting song by ID: {song_id}")
-        movie_model.delete_song(song_id)
+        app.logger.info(f"Deleting movie by ID: {movie_id}")
+        movie_model.delete_movie(movie_id)
         return make_response(jsonify({'status': 'success'}), 200)
     except Exception as e:
-        app.logger.error(f"Error deleting song: {e}")
+        app.logger.error(f"Error deleting movie: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
 
-@app.route('/api/get-all-songs-from-catalog', methods=['GET'])
-def get_all_songs() -> Response:
+@app.route('/api/get-all-movies-from-catalog', methods=['GET'])
+def get_all_movies() -> Response:
     """
-    Route to retrieve all songs in the catalog (non-deleted), with an option to sort by play count.
+    Route to retrieve all movies in the catalog (non-deleted), with an option to sort by watch count.
 
     Query Parameter:
-        - sort_by_play_count (bool, optional): If true, sort songs by play count.
+        - sort_by_watch_count (bool, optional): If true, sort movies by watch count.
 
     Returns:
-        JSON response with the list of songs or error message.
+        JSON response with the list of movies or error message.
     """
     try:
-        # Extract query parameter for sorting by play count
-        sort_by_play_count = request.args.get('sort_by_play_count', 'false').lower() == 'true'
+        # Extract query parameter for sorting by watch count
+        sort_by_watch_count = request.args.get('sort_by_watch_count', 'false').lower() == 'true'
 
-        app.logger.info("Retrieving all songs from the catalog, sort_by_play_count=%s", sort_by_play_count)
-        songs = movie_model.get_all_songs(sort_by_play_count=sort_by_play_count)
+        app.logger.info("Retrieving all movies from the catalog, sort_by_watch_count=%s", sort_by_watch_count)
+        movies = movie_model.get_all_movies(sort_by_watch_count=sort_by_watch_count)
 
-        return make_response(jsonify({'status': 'success', 'songs': songs}), 200)
+        return make_response(jsonify({'status': 'success', 'movies': movies}), 200)
     except Exception as e:
-        app.logger.error(f"Error retrieving songs: {e}")
+        app.logger.error(f"Error retrieving movies: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
 
-@app.route('/api/get-song-from-catalog-by-id/<int:song_id>', methods=['GET'])
-def get_song_by_id(song_id: int) -> Response:
+@app.route('/api/get-movie-from-catalog-by-id/<int:movie_id>', methods=['GET'])
+def get_movie_by_id(movie_id: int) -> Response:
     """
-    Route to retrieve a song by its ID.
+    Route to retrieve a movie by its ID.
 
     Path Parameter:
-        - song_id (int): The ID of the song.
+        - movie_id (int): The ID of the movie.
 
     Returns:
-        JSON response with the song details or error message.
+        JSON response with the movie details or error message.
     """
     try:
-        app.logger.info(f"Retrieving song by ID: {song_id}")
-        song = movie_model.get_song_by_id(song_id)
-        return make_response(jsonify({'status': 'success', 'song': song}), 200)
+        app.logger.info(f"Retrieving movie by ID: {movie_id}")
+        movie = movie_model.get_movie_by_id(movie_id)
+        return make_response(jsonify({'status': 'success', 'movie': movie}), 200)
     except Exception as e:
-        app.logger.error(f"Error retrieving song by ID: {e}")
+        app.logger.error(f"Error retrieving movie by ID: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get-song-from-catalog-by-compound-key', methods=['GET'])
-def get_song_by_compound_key() -> Response:
+@app.route('/api/get-movie-from-catalog-by-compound-key', methods=['GET'])
+def get_movie_by_compound_key() -> Response:
     """
-    Route to retrieve a song by its compound key (artist, title, year).
+    Route to retrieve a movie by its compound key (director, title, year).
 
     Query Parameters:
-        - artist (str): The artist's name.
-        - title (str): The song title.
-        - year (int): The year the song was released.
+        - director (str): The director's name.
+        - title (str): The movie title.
+        - year (int): The year the movie was released.
 
     Returns:
-        JSON response with the song details or error message.
+        JSON response with the movie details or error message.
     """
     try:
         # Extract query parameters from the request
-        artist = request.args.get('artist')
+        director = request.args.get('director')
         title = request.args.get('title')
         year = request.args.get('year')
 
-        if not artist or not title or not year:
-            return make_response(jsonify({'error': 'Missing required query parameters: artist, title, year'}), 400)
+        if not director or not title or not year:
+            return make_response(jsonify({'error': 'Missing required query parameters: director, title, year'}), 400)
 
         # Attempt to cast year to an integer
         try:
@@ -207,46 +209,46 @@ def get_song_by_compound_key() -> Response:
         except ValueError:
             return make_response(jsonify({'error': 'Year must be an integer'}), 400)
 
-        app.logger.info(f"Retrieving song by compound key: {artist}, {title}, {year}")
-        song = movie_model.get_song_by_compound_key(artist, title, year)
-        return make_response(jsonify({'status': 'success', 'song': song}), 200)
+        app.logger.info(f"Retrieving movie by compound key: {director}, {title}, {year}")
+        movie = movie_model.get_movie_by_compound_key(director, title, year)
+        return make_response(jsonify({'status': 'success', 'movie': movie}), 200)
 
     except Exception as e:
-        app.logger.error(f"Error retrieving song by compound key: {e}")
+        app.logger.error(f"Error retrieving movie by compound key: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get-random-song', methods=['GET'])
-def get_random_song() -> Response:
+@app.route('/api/get-random-movie', methods=['GET'])
+def get_random_movie() -> Response:
     """
-    Route to retrieve a random song from the catalog.
+    Route to retrieve a random movie from the catalog.
 
     Returns:
-        JSON response with the details of a random song or error message.
+        JSON response with the details of a random movie or error message.
     """
     try:
-        app.logger.info("Retrieving a random song from the catalog")
-        song = movie_model.get_random_song()
-        return make_response(jsonify({'status': 'success', 'song': song}), 200)
+        app.logger.info("Retrieving a random movie from the catalog")
+        movie = movie_model.get_random_movie()
+        return make_response(jsonify({'status': 'success', 'movie': movie}), 200)
     except Exception as e:
-        app.logger.error(f"Error retrieving a random song: {e}")
+        app.logger.error(f"Error retrieving a random movie: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
 
 ############################################################
 #
-# Playlist Management
+# Watchlist Management
 #
 ############################################################
 
-@app.route('/api/add-song-to-playlist', methods=['POST'])
-def add_song_to_playlist() -> Response:
+@app.route('/api/add-movie-to-watchlist', methods=['POST'])
+def add_movie_to_watchlist() -> Response:
     """
-    Route to add a song to the playlist by compound key (artist, title, year).
+    Route to add a movie to the watchlist by compound key (director, title, year).
 
     Expected JSON Input:
-        - artist (str): The artist's name.
-        - title (str): The song title.
-        - year (int): The year the song was released.
+        - director (str): The director's name.
+        - title (str): The movie title.
+        - year (int): The year the movie was released.
 
     Returns:
         JSON response indicating success of the addition or error message.
@@ -254,35 +256,35 @@ def add_song_to_playlist() -> Response:
     try:
         data = request.get_json()
 
-        artist = data.get('artist')
+        director = data.get('director')
         title = data.get('title')
         year = data.get('year')
 
-        if not artist or not title or not year:
-            return make_response(jsonify({'error': 'Invalid input. Artist, title, and year are required.'}), 400)
+        if not director or not title or not year:
+            return make_response(jsonify({'error': 'Invalid input. Director, title, and year are required.'}), 400)
 
-        # Lookup the song by compound key
-        song = movie_model.get_song_by_compound_key(artist, title, year)
+        # Lookup the movie by compound key
+        movie = movie_model.get_movie_by_compound_key(director, title, year)
 
-        # Add song to playlist
-        playlist_model.add_song_to_playlist(song)
+        # Add movie to watchlist
+        watchlist_model.add_movie_to_watchlist(movie)
 
-        app.logger.info(f"Song added to playlist: {artist} - {title} ({year})")
-        return make_response(jsonify({'status': 'success', 'message': 'Song added to playlist'}), 201)
+        app.logger.info(f"Movie added to watchlist: {director} - {title} ({year})")
+        return make_response(jsonify({'status': 'success', 'message': 'Movie added to watchlist'}), 201)
 
     except Exception as e:
-        app.logger.error(f"Error adding song to playlist: {e}")
+        app.logger.error(f"Error adding movie to watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/remove-song-from-playlist', methods=['DELETE'])
-def remove_song_by_song_id() -> Response:
+@app.route('/api/remove-movie-from-watchlist', methods=['DELETE'])
+def remove_movie_by_movie_id() -> Response:
     """
-    Route to remove a song from the playlist by compound key (artist, title, year).
+    Route to remove a movie from the watchlist by compound key (director, title, year).
 
     Expected JSON Input:
-        - artist (str): The artist's name.
-        - title (str): The song title.
-        - year (int): The year the song was released.
+        - director (str): The director's name.
+        - title (str): The movie title.
+        - year (int): The year the movie was released.
 
     Returns:
         JSON response indicating success of the removal or error message.
@@ -290,294 +292,358 @@ def remove_song_by_song_id() -> Response:
     try:
         data = request.get_json()
 
-        artist = data.get('artist')
+        director = data.get('director')
         title = data.get('title')
         year = data.get('year')
 
-        if not artist or not title or not year:
-            return make_response(jsonify({'error': 'Invalid input. Artist, title, and year are required.'}), 400)
+        if not director or not title or not year:
+            return make_response(jsonify({'error': 'Invalid input. Director, title, and year are required.'}), 400)
 
-        # Lookup the song by compound key
-        song = movie_model.get_song_by_compound_key(artist, title, year)
+        # Lookup the movie by compound key
+        movie = movie_model.get_movie_by_compound_key(director, title, year)
 
-        # Remove song from playlist
-        playlist_model.remove_song_by_song_id(song.id)
+        # Remove movie from watchlist
+        watchlist_model.remove_movie_by_movie_id(movie.id)
 
-        app.logger.info(f"Song removed from playlist: {artist} - {title} ({year})")
-        return make_response(jsonify({'status': 'success', 'message': 'Song removed from playlist'}), 200)
+        app.logger.info(f"Movie removed from watchlist: {director} - {title} ({year})")
+        return make_response(jsonify({'status': 'success', 'message': 'Movie removed from watchlist'}), 200)
 
     except Exception as e:
-        app.logger.error(f"Error removing song from playlist: {e}")
+        app.logger.error(f"Error removing movie from watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/remove-song-from-playlist-by-track-number/<int:track_number>', methods=['DELETE'])
-def remove_song_by_track_number(track_number: int) -> Response:
+@app.route('/api/remove-movie-from-watchlist-by-film-number/<int:film_number>', methods=['DELETE'])
+def remove_movie_by_film_number(film_number: int) -> Response:
     """
-    Route to remove a song from the playlist by track number.
+    Route to remove a movie from the watchlist by film number.
 
     Path Parameter:
-        - track_number (int): The track number of the song to remove.
+        - film_number (int): The film number of the movie to remove.
 
     Returns:
         JSON response indicating success of the removal or an error message.
     """
     try:
-        app.logger.info(f"Removing song from playlist by track number: {track_number}")
+        app.logger.info(f"Removing movie from watchlist by film number: {film_number}")
 
-        # Remove song by track number
-        playlist_model.remove_song_by_track_number(track_number)
+        # Remove movie by film number
+        watchlist_model.remove_movie_by_film_number(film_number)
 
-        return make_response(jsonify({'status': 'success', 'message': f'Song at track number {track_number} removed from playlist'}), 200)
+        return make_response(jsonify({'status': 'success', 'message': f'Movie at film number {film_number} removed from watchlist'}), 200)
 
     except ValueError as e:
-        app.logger.error(f"Error removing song by track number: {e}")
+        app.logger.error(f"Error removing movie by film number: {e}")
         return make_response(jsonify({'error': str(e)}), 404)
     except Exception as e:
-        app.logger.error(f"Error removing song from playlist: {e}")
+        app.logger.error(f"Error removing movie from watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/clear-playlist', methods=['POST'])
-def clear_playlist() -> Response:
+@app.route('/api/clear-watchlist', methods=['POST'])
+def clear_watchlist() -> Response:
     """
-    Route to clear all songs from the playlist.
+    Route to clear all movies from the watchlist.
 
     Returns:
         JSON response indicating success of the operation or an error message.
     """
     try:
-        app.logger.info('Clearing the playlist')
+        app.logger.info('Clearing the watchlist')
 
-        # Clear the entire playlist
-        playlist_model.clear_playlist()
+        # Clear the entire watchlist
+        watchlist_model.clear_watchlist()
 
-        return make_response(jsonify({'status': 'success', 'message': 'Playlist cleared'}), 200)
+        return make_response(jsonify({'status': 'success', 'message': 'Watchlist cleared'}), 200)
 
     except Exception as e:
-        app.logger.error(f"Error clearing the playlist: {e}")
+        app.logger.error(f"Error clearing the watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
 ############################################################
 #
-# Play Playlist
+# Play Watchlist
 #
 ############################################################
 
-@app.route('/api/play-current-song', methods=['POST'])
-def play_current_song() -> Response:
+@app.route('/api/play-current-movie', methods=['POST'])
+def play_current_movie() -> Response:
     """
-    Route to play the current song in the playlist.
+    Route to play the current movie in the watchlist.
 
     Returns:
         JSON response indicating success of the operation.
     Raises:
-        500 error if there is an issue playing the current song.
+        500 error if there is an issue playing the current movie.
     """
     try:
-        app.logger.info('Playing current song')
-        current_song = playlist_model.get_current_song()
-        playlist_model.play_current_song()
+        app.logger.info('Playing current movie')
+        current_movie = watchlist_model.get_current_movie()
+        watchlist_model.play_current_movie()
 
         return make_response(jsonify({
             'status': 'success',
-            'song': {
-                'id': current_song.id,
-                'artist': current_song.artist,
-                'title': current_song.title,
-                'year': current_song.year,
-                'genre': current_song.genre,
-                'duration': current_song.duration
+            'movie': {
+                'id': current_movie.id,
+                'director': current_movie.director,
+                'title': current_movie.title,
+                'year': current_movie.year,
+                'genre': current_movie.genre,
+                'duration': current_movie.duration,
+                'rating': current_movie.rating
             }
         }), 200)
     except Exception as e:
-        app.logger.error(f"Error playing current song: {e}")
+        app.logger.error(f"Error playing current movie: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
 
-@app.route('/api/play-entire-playlist', methods=['POST'])
-def play_entire_playlist() -> Response:
+@app.route('/api/play-entire-watchlist', methods=['POST'])
+def play_entire_watchlist() -> Response:
     """
-    Route to play all songs in the playlist.
+    Route to play all movies in the watchlist.
 
     Returns:
         JSON response indicating success of the operation.
     Raises:
-        500 error if there is an issue playing the playlist.
+        500 error if there is an issue playing the watchlist.
     """
     try:
-        app.logger.info('Playing entire playlist')
-        playlist_model.play_entire_playlist()
+        app.logger.info('Playing entire watchlist')
+        watchlist_model.play_entire_watchlist()
         return make_response(jsonify({'status': 'success'}), 200)
     except Exception as e:
-        app.logger.error(f"Error playing playlist: {e}")
+        app.logger.error(f"Error playing watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/play-rest-of-playlist', methods=['POST'])
-def play_rest_of_playlist() -> Response:
+@app.route('/api/play-rest-of-watchlist', methods=['POST'])
+def play_rest_of_watchlist() -> Response:
     """
-    Route to play the rest of the playlist from the current track.
+    Route to play the rest of the watchlist from the current track.
 
     Returns:
         JSON response indicating success of the operation.
     Raises:
-        500 error if there is an issue playing the rest of the playlist.
+        500 error if there is an issue playing the rest of the watchlist.
     """
     try:
-        app.logger.info('Playing rest of the playlist')
-        playlist_model.play_rest_of_playlist()
+        app.logger.info('Playing rest of the watchlist')
+        watchlist_model.play_rest_of_watchlist()
         return make_response(jsonify({'status': 'success'}), 200)
     except Exception as e:
-        app.logger.error(f"Error playing rest of the playlist: {e}")
+        app.logger.error(f"Error playing rest of the watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/rewind-playlist', methods=['POST'])
-def rewind_playlist() -> Response:
+@app.route('/api/rewind-watchlist', methods=['POST'])
+def rewind_watchlist() -> Response:
     """
-    Route to rewind the playlist to the first song.
+    Route to rewind the watchlist to the first movie.
 
     Returns:
         JSON response indicating success of the operation.
     Raises:
-        500 error if there is an issue rewinding the playlist.
+        500 error if there is an issue rewinding the watchlist.
     """
     try:
-        app.logger.info('Rewinding playlist to the first song')
-        playlist_model.rewind_playlist()
+        app.logger.info('Rewinding watchlist to the first movie')
+        watchlist_model.rewind_watchlist()
         return make_response(jsonify({'status': 'success'}), 200)
     except Exception as e:
-        app.logger.error(f"Error rewinding playlist: {e}")
+        app.logger.error(f"Error rewinding watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get-all-songs-from-playlist', methods=['GET'])
-def get_all_songs_from_playlist() -> Response:
+@app.route('/api/get-all-movies-from-watchlist', methods=['GET'])
+def get_all_movies_from_watchlist() -> Response:
     """
-    Route to retrieve all songs in the playlist.
+    Route to retrieve all movies in the watchlist.
 
     Returns:
-        JSON response with the list of songs or an error message.
+        JSON response with the list of movies or an error message.
     """
     try:
-        app.logger.info("Retrieving all songs from the playlist")
+        app.logger.info("Retrieving all movies from the watchlist")
 
-        # Get all songs from the playlist
-        songs = playlist_model.get_all_songs()
+        # Get all movies from the watchlist
+        movies = watchlist_model.get_all_movies()
 
-        return make_response(jsonify({'status': 'success', 'songs': songs}), 200)
+        return make_response(jsonify({'status': 'success', 'movies': movies}), 200)
 
     except Exception as e:
-        app.logger.error(f"Error retrieving songs from playlist: {e}")
+        app.logger.error(f"Error retrieving movies from watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get-song-from-playlist-by-track-number/<int:track_number>', methods=['GET'])
-def get_song_by_track_number(track_number: int) -> Response:
+@app.route('/api/get-movie-from-watchlist-by-film-number/<int:film_number>', methods=['GET'])
+def get_movie_by_film_number(film_number: int) -> Response:
     """
-    Route to retrieve a song by its track number from the playlist.
+    Route to retrieve a movie by its film number from the watchlist.
 
     Path Parameter:
-        - track_number (int): The track number of the song.
+        - film_number (int): The film number of the movie.
 
     Returns:
-        JSON response with the song details or error message.
+        JSON response with the movie details or error message.
     """
     try:
-        app.logger.info(f"Retrieving song from playlist by track number: {track_number}")
+        app.logger.info(f"Retrieving movie from watchlist by film number: {film_number}")
 
-        # Get the song by track number
-        song = playlist_model.get_song_by_track_number(track_number)
+        # Get the movie by film number
+        movie = watchlist_model.get_movie_by_film_number(film_number)
 
-        return make_response(jsonify({'status': 'success', 'song': song}), 200)
+        return make_response(jsonify({'status': 'success', 'movie': movie}), 200)
 
     except ValueError as e:
-        app.logger.error(f"Error retrieving song by track number: {e}")
+        app.logger.error(f"Error retrieving movie by film number: {e}")
         return make_response(jsonify({'error': str(e)}), 404)
     except Exception as e:
-        app.logger.error(f"Error retrieving song from playlist: {e}")
+        app.logger.error(f"Error retrieving movie from watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get-current-song', methods=['GET'])
-def get_current_song() -> Response:
+@app.route('/api/get-current-movie', methods=['GET'])
+def get_current_movie() -> Response:
     """
-    Route to retrieve the current song being played.
+    Route to retrieve the current movie being played.
 
     Returns:
-        JSON response with the current song details or error message.
+        JSON response with the current movie details or error message.
     """
     try:
-        app.logger.info("Retrieving the current song from the playlist")
+        app.logger.info("Retrieving the current movie from the watchlist")
 
-        # Get the current song
-        current_song = playlist_model.get_current_song()
+        # Get the current movie
+        current_movie = watchlist_model.get_current_movie()
 
-        return make_response(jsonify({'status': 'success', 'current_song': current_song}), 200)
+        return make_response(jsonify({'status': 'success', 'current_movie': current_movie}), 200)
 
     except Exception as e:
-        app.logger.error(f"Error retrieving current song: {e}")
+        app.logger.error(f"Error retrieving current movie: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get-playlist-length-duration', methods=['GET'])
-def get_playlist_length_and_duration() -> Response:
+@app.route('/api/get-watchlist-length-duration', methods=['GET'])
+def get_watchlist_length_and_duration() -> Response:
     """
-    Route to retrieve both the length (number of songs) and the total duration of the playlist.
+    Route to retrieve both the length (number of movies) and the total duration of the watchlist.
 
     Returns:
-        JSON response with the playlist length and total duration or error message.
+        JSON response with the watchlist length and total duration or error message.
     """
     try:
-        app.logger.info("Retrieving playlist length and total duration")
+        app.logger.info("Retrieving watchlist length and total duration")
 
-        # Get playlist length and duration
-        playlist_length = playlist_model.get_playlist_length()
-        playlist_duration = playlist_model.get_playlist_duration()
+        # Get watchlist length and duration
+        watchlist_length = watchlist_model.get_watchlist_length()
+        watchlist_duration = watchlist_model.get_watchlist_duration()
 
         return make_response(jsonify({
             'status': 'success',
-            'playlist_length': playlist_length,
-            'playlist_duration': playlist_duration
+            'watchlist_length': watchlist_length,
+            'watchlist_duration': watchlist_duration
         }), 200)
 
     except Exception as e:
-        app.logger.error(f"Error retrieving playlist length and duration: {e}")
+        app.logger.error(f"Error retrieving watchlist length and duration: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/go-to-track-number/<int:track_number>', methods=['POST'])
-def go_to_track_number(track_number: int) -> Response:
+@app.route('/api/go-to-film-number/<int:film_number>', methods=['POST'])
+def go_to_film_number(film_number: int) -> Response:
     """
-    Route to set the playlist to start playing from a specific track number.
+    Route to set the watchlist to start playing from a specific film number.
 
     Path Parameter:
-        - track_number (int): The track number to set as the current song.
+        - film_number (int): The film number to set as the current movie.
 
     Returns:
         JSON response indicating success or an error message.
     """
     try:
-        app.logger.info(f"Going to track number: {track_number}")
+        app.logger.info(f"Going to film number: {film_number}")
 
-        # Set the playlist to start at the given track number
-        playlist_model.go_to_track_number(track_number)
+        # Set the watchlist to start at the given film number
+        watchlist_model.go_to_film_number(film_number)
 
-        return make_response(jsonify({'status': 'success', 'track_number': track_number}), 200)
+        return make_response(jsonify({'status': 'success', 'film_number': film_number}), 200)
     except ValueError as e:
-        app.logger.error(f"Error going to track number {track_number}: {e}")
+        app.logger.error(f"Error going to film number {film_number}: {e}")
         return make_response(jsonify({'error': str(e)}), 400)
     except Exception as e:
-        app.logger.error(f"Error going to track number: {e}")
+        app.logger.error(f"Error going to film number: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
 ############################################################
 #
-# Arrange Playlist
+# Arrange Watchlist
 #
 ############################################################
 
-@app.route('/api/move-song-to-beginning', methods=['POST'])
-def move_song_to_beginning() -> Response:
+@app.route('/api/move-movie-to-beginning', methods=['POST'])
+def move_movie_to_beginning() -> Response:
     """
-    Route to move a song to the beginning of the playlist.
+    Route to move a movie to the beginning of the watchlist.
 
     Expected JSON Input:
-        - artist (str): The artist of the song.
-        - title (str): The title of the song.
-        - year (int): The year the song was released.
+        - director (str): The director of the movie.
+        - title (str): The title of the movie.
+        - year (int): The year the movie was released.
+
+    Returns:
+        JSON response indicating success or an error message.
+    """
+    try:
+        data = request.get_json()
+
+        director = data.get('director')
+        title = data.get('title')
+        year = data.get('year')
+
+        app.logger.info(f"Moving movie to beginning: {director} - {title} ({year})")
+
+        # Retrieve movie by compound key and move it to the beginning
+        movie = movie_model.get_movie_by_compound_key(director, title, year)
+        watchlist_model.move_movie_to_beginning(movie.id)
+
+        return make_response(jsonify({'status': 'success', 'movie': f'{director} - {title}'}), 200)
+    except Exception as e:
+        app.logger.error(f"Error moving movie to beginning: {e}")
+        return make_response(jsonify({'error': str(e)}), 500)
+
+@app.route('/api/move-movie-to-end', methods=['POST'])
+def move_movie_to_end() -> Response:
+    """
+    Route to move a movie to the end of the watchlist.
+
+    Expected JSON Input:
+        - director (str): The director of the movie.
+        - title (str): The title of the movie.
+        - year (int): The year the movie was released.
+
+    Returns:
+        JSON response indicating success or an error message.
+    """
+    try:
+        data = request.get_json()
+
+        director = data.get('director')
+        title = data.get('title')
+        year = data.get('year')
+
+        app.logger.info(f"Moving movie to end: {director} - {title} ({year})")
+
+        # Retrieve movie by compound key and move it to the end
+        movie = movie_model.get_movie_by_compound_key(director, title, year)
+        watchlist_model.move_movie_to_end(movie.id)
+
+        return make_response(jsonify({'status': 'success', 'movie': f'{director} - {title}'}), 200)
+    except Exception as e:
+        app.logger.error(f"Error moving movie to end: {e}")
+        return make_response(jsonify({'error': str(e)}), 500)
+
+@app.route('/api/move-movie-to-film-number', methods=['POST'])
+def move_movie_to_film_number() -> Response:
+    """
+    Route to move a movie to a specific film number in the watchlist.
+
+    Expected JSON Input:
+        - artist (str): The artist of the movie.
+        - title (str): The title of the movie.
+        - year (int): The year the movie was released.
+        - film_number (int): The new film number to move the movie to.
 
     Returns:
         JSON response indicating success or an error message.
@@ -588,27 +654,27 @@ def move_song_to_beginning() -> Response:
         artist = data.get('artist')
         title = data.get('title')
         year = data.get('year')
+        film_number = data.get('film_number')
 
-        app.logger.info(f"Moving song to beginning: {artist} - {title} ({year})")
+        app.logger.info(f"Moving movie to film number {film_number}: {artist} - {title} ({year})")
 
-        # Retrieve song by compound key and move it to the beginning
-        song = movie_model.get_song_by_compound_key(artist, title, year)
-        playlist_model.move_song_to_beginning(song.id)
+        # Retrieve movie by compound key and move it to the specified film number
+        movie = movie_model.get_movie_by_compound_key(artist, title, year)
+        watchlist_model.move_movie_to_film_number(movie.id, film_number)
 
-        return make_response(jsonify({'status': 'success', 'song': f'{artist} - {title}'}), 200)
+        return make_response(jsonify({'status': 'success', 'movie': f'{artist} - {title}', 'film_number': film_number}), 200)
     except Exception as e:
-        app.logger.error(f"Error moving song to beginning: {e}")
+        app.logger.error(f"Error moving movie to film number: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/move-song-to-end', methods=['POST'])
-def move_song_to_end() -> Response:
+@app.route('/api/swap-movies-in-watchlist', methods=['POST'])
+def swap_movies_in_watchlist() -> Response:
     """
-    Route to move a song to the end of the playlist.
+    Route to swap two movies in the watchlist by their film numbers.
 
     Expected JSON Input:
-        - artist (str): The artist of the song.
-        - title (str): The title of the song.
-        - year (int): The year the song was released.
+        - film_number_1 (int): The film number of the first movie.
+        - film_number_2 (int): The film number of the second movie.
 
     Returns:
         JSON response indicating success or an error message.
@@ -616,88 +682,25 @@ def move_song_to_end() -> Response:
     try:
         data = request.get_json()
 
-        artist = data.get('artist')
-        title = data.get('title')
-        year = data.get('year')
+        film_number_1 = data.get('film_number_1')
+        film_number_2 = data.get('film_number_2')
 
-        app.logger.info(f"Moving song to end: {artist} - {title} ({year})")
+        app.logger.info(f"Swapping movies at film numbers {film_number_1} and {film_number_2}")
 
-        # Retrieve song by compound key and move it to the end
-        song = movie_model.get_song_by_compound_key(artist, title, year)
-        playlist_model.move_song_to_end(song.id)
-
-        return make_response(jsonify({'status': 'success', 'song': f'{artist} - {title}'}), 200)
-    except Exception as e:
-        app.logger.error(f"Error moving song to end: {e}")
-        return make_response(jsonify({'error': str(e)}), 500)
-
-@app.route('/api/move-song-to-track-number', methods=['POST'])
-def move_song_to_track_number() -> Response:
-    """
-    Route to move a song to a specific track number in the playlist.
-
-    Expected JSON Input:
-        - artist (str): The artist of the song.
-        - title (str): The title of the song.
-        - year (int): The year the song was released.
-        - track_number (int): The new track number to move the song to.
-
-    Returns:
-        JSON response indicating success or an error message.
-    """
-    try:
-        data = request.get_json()
-
-        artist = data.get('artist')
-        title = data.get('title')
-        year = data.get('year')
-        track_number = data.get('track_number')
-
-        app.logger.info(f"Moving song to track number {track_number}: {artist} - {title} ({year})")
-
-        # Retrieve song by compound key and move it to the specified track number
-        song = movie_model.get_song_by_compound_key(artist, title, year)
-        playlist_model.move_song_to_track_number(song.id, track_number)
-
-        return make_response(jsonify({'status': 'success', 'song': f'{artist} - {title}', 'track_number': track_number}), 200)
-    except Exception as e:
-        app.logger.error(f"Error moving song to track number: {e}")
-        return make_response(jsonify({'error': str(e)}), 500)
-
-@app.route('/api/swap-songs-in-playlist', methods=['POST'])
-def swap_songs_in_playlist() -> Response:
-    """
-    Route to swap two songs in the playlist by their track numbers.
-
-    Expected JSON Input:
-        - track_number_1 (int): The track number of the first song.
-        - track_number_2 (int): The track number of the second song.
-
-    Returns:
-        JSON response indicating success or an error message.
-    """
-    try:
-        data = request.get_json()
-
-        track_number_1 = data.get('track_number_1')
-        track_number_2 = data.get('track_number_2')
-
-        app.logger.info(f"Swapping songs at track numbers {track_number_1} and {track_number_2}")
-
-        # Retrieve songs by track numbers and swap them
-        song_1 = playlist_model.get_song_by_track_number(track_number_1)
-        song_2 = playlist_model.get_song_by_track_number(track_number_2)
-        playlist_model.swap_songs_in_playlist(song_1.id, song_2.id)
+        # Retrieve movies by film numbers and swap them
+        movie_1 = watchlist_model.get_movie_by_film_number(film_number_1)
+        movie_2 = watchlist_model.get_movie_by_film_number(film_number_2)
+        watchlist_model.swap_movies_in_watchlist(movie_1.id, movie_2.id)
 
         return make_response(jsonify({
             'status': 'success',
-            'swapped_songs': {
-                'track_1': {'id': song_1.id, 'artist': song_1.artist, 'title': song_1.title},
-                'track_2': {'id': song_2.id, 'artist': song_2.artist, 'title': song_2.title}
+            'swapped_movies': {
+                'film_1': {'id': movie_1.id, 'director': movie_1.director, 'title': movie_1.title},
+                'film_2': {'id': movie_2.id, 'director': movie_2.director, 'title': movie_2.title}
             }
         }), 200)
     except Exception as e:
-        app.logger.error(f"Error swapping songs in playlist: {e}")
+        app.logger.error(f"Error swapping movies in watchlist: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
 
 ############################################################
@@ -706,19 +709,19 @@ def swap_songs_in_playlist() -> Response:
 #
 ############################################################
 
-@app.route('/api/song-leaderboard', methods=['GET'])
-def get_song_leaderboard() -> Response:
+@app.route('/api/movie-leaderboard', methods=['GET'])
+def get_movie_leaderboard() -> Response:
     """
-    Route to get a list of all sorted by play count.
+    Route to get a list of all sorted by watch count.
 
     Returns:
-        JSON response with a sorted leaderboard of songs.
+        JSON response with a sorted leaderboard of movies.
     Raises:
         500 error if there is an issue generating the leaderboard.
     """
     try:
-        app.logger.info("Generating song leaderboard sorted")
-        leaderboard_data = movie_model.get_all_songs(sort_by_play_count=True)
+        app.logger.info("Generating movie leaderboard sorted")
+        leaderboard_data = movie_model.get_all_movies(sort_by_watch_count=True)
         return make_response(jsonify({'status': 'success', 'leaderboard': leaderboard_data}), 200)
     except Exception as e:
         app.logger.error(f"Error generating leaderboard: {e}")

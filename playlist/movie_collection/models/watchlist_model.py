@@ -9,7 +9,7 @@ configure_logger(logger)
 
 class WatchlistModel:
     """
-    A class to manage a watchist of movies.
+    A class to manage a watchlist of movies.
 
     Attributes:
         current_film_number (int): The current film number being watched.
@@ -49,7 +49,7 @@ class WatchlistModel:
             logger.error("Movie with ID %d already exists in the watchlist", movie.id)
             raise ValueError(f"Movie with ID {movie.id} already exists in the watchlist")
 
-        self.playlist.append(movie)
+        self.watchlist.append(movie)
 
     def remove_movie_by_movie_id(self, movie_id: int) -> None:
         """
@@ -77,7 +77,7 @@ class WatchlistModel:
         Raises:
             ValueError: If the watchlist is empty or the film number is invalid.
         """
-        logger.info("Removing movie at film number %d from playlist", film_number)
+        logger.info("Removing movie at film number %d from watchlist", film_number)
         self.check_if_empty()
         film_number = self.validate_film_number(film_number)
         watchlist_index = film_number - 1
@@ -136,237 +136,237 @@ class WatchlistModel:
         logger.info("Getting movie at film number %d from watchlist", film_number)
         return self.watchlist[watchlist_index]
 
-    def get_current_song(self) -> Song:
+    def get_current_movie(self) -> Movie:
         """
-        Returns the current song being played.
+        Returns the current movie being watched.
         """
         self.check_if_empty()
-        return self.get_song_by_track_number(self.current_track_number)
+        return self.get_movie_by_film_number(self.current_film_number)
 
-    def get_playlist_length(self) -> int:
+    def get_watchlist_length(self) -> int:
         """
-        Returns the number of songs in the playlist.
+        Returns the number of movies in the watchlist.
         """
-        return len(self.playlist)
+        return len(self.watchlist)
 
-    def get_playlist_duration(self) -> int:
+    def get_watchlist_duration(self) -> int:
         """
-        Returns the total duration of the playlist in seconds.
+        Returns the total duration of the watchlist in minutes.
         """
-        return sum(song.duration for song in self.playlist)
+        return sum(movie.duration for movie in self.watchlist)
 
     ##################################################
-    # Playlist Movement Functions
+    # Watchlist Movement Functions
     ##################################################
 
-    def go_to_track_number(self, track_number: int) -> None:
+    def go_to_film_number(self, film_number: int) -> None:
         """
-        Sets the current track number to the specified track number.
+        Sets the current film number to the specified film number.
 
         Args:
-            track_number (int): The track number to set as the current track.
+            film_number (int): The film number to set as the current film.
         """
         self.check_if_empty()
-        track_number = self.validate_track_number(track_number)
-        logger.info("Setting current track number to %d", track_number)
-        self.current_track_number = track_number
+        film_number = self.validate_film_number(film_number)
+        logger.info("Setting current film number to %d", film_number)
+        self.current_film_number = film_number
 
-    def move_song_to_beginning(self, song_id: int) -> None:
+    def move_movie_to_beginning(self, movie_id: int) -> None:
         """
-        Moves a song to the beginning of the playlist.
+        Moves a movie to the beginning of the watchlist.
 
         Args:
-            song_id (int): The ID of the song to move to the beginning.
+            movie_id (int): The ID of the movie to move to the beginning.
         """
-        logger.info("Moving song with ID %d to the beginning of the playlist", song_id)
+        logger.info("Moving movie with ID %d to the beginning of the watchlist", movie_id)
         self.check_if_empty()
-        song_id = self.validate_song_id(song_id)
-        song = self.get_song_by_song_id(song_id)
-        self.playlist.remove(song)
-        self.playlist.insert(0, song)
-        logger.info("Song with ID %d has been moved to the beginning", song_id)
+        movie_id = self.validate_movie_id(movie_id)
+        movie = self.get_movie_by_movie_id(movie_id)
+        self.watchlist.remove(movie)
+        self.watchlist.insert(0, movie)
+        logger.info("Movie with ID %d has been moved to the beginning", movie_id)
 
-    def move_song_to_end(self, song_id: int) -> None:
+    def move_movie_to_end(self, movie_id: int) -> None:
         """
-        Moves a song to the end of the playlist.
+        Moves a movie to the end of the watchlist.
 
         Args:
-            song_id (int): The ID of the song to move to the end.
+            movie_id (int): The ID of the movie to move to the end.
         """
-        logger.info("Moving song with ID %d to the end of the playlist", song_id)
+        logger.info("Moving movie with ID %d to the end of the watchlist", movie_id)
         self.check_if_empty()
-        song_id = self.validate_song_id(song_id)
-        song = self.get_song_by_song_id(song_id)
-        self.playlist.remove(song)
-        self.playlist.append(song)
-        logger.info("Song with ID %d has been moved to the end", song_id)
+        movie_id = self.validate_movie_id(movie_id)
+        movie = self.get_movie_by_movie_id(movie_id)
+        self.watchlist.remove(movie)
+        self.watchlist.append(movie)
+        logger.info("Movie with ID %d has been moved to the end", movie_id)
 
-    def move_song_to_track_number(self, song_id: int, track_number: int) -> None:
+    def move_movie_to_film_number(self, movie_id: int, film_number: int) -> None:
         """
-        Moves a song to a specific track number in the playlist.
+        Moves a movie to a specific film number in the watchlist.
 
         Args:
-            song_id (int): The ID of the song to move.
-            track_number (int): The track number to move the song to (1-indexed).
+            movie_id (int): The ID of the movie to move.
+            film_number (int): The film number to move the movie to (1-indexed).
         """
-        logger.info("Moving song with ID %d to track number %d", song_id, track_number)
+        logger.info("Moving movie with ID %d to film number %d", movie_id, film_number)
         self.check_if_empty()
-        song_id = self.validate_song_id(song_id)
-        track_number = self.validate_track_number(track_number)
-        playlist_index = track_number - 1
-        song = self.get_song_by_song_id(song_id)
-        self.playlist.remove(song)
-        self.playlist.insert(playlist_index, song)
-        logger.info("Song with ID %d has been moved to track number %d", song_id, track_number)
+        movie_id = self.validate_movie_id(movie_id)
+        film_number = self.validate_film_number(film_number)
+        watchlist_index = film_number - 1
+        movie = self.get_movie_by_movie_id(movie_id)
+        self.watchlist.remove(movie)
+        self.watchlist.insert(watchlist_index, movie)
+        logger.info("Movie with ID %d has been moved to film number %d", movie_id, film_number)
 
-    def swap_songs_in_playlist(self, song1_id: int, song2_id: int) -> None:
+    def swap_movies_in_watchlist(self, movie1_id: int, movie2_id: int) -> None:
         """
-        Swaps the positions of two songs in the playlist.
+        Swaps the positions of two movies in the watchlist.
 
         Args:
-            song1_id (int): The ID of the first song to swap.
-            song2_id (int): The ID of the second song to swap.
+            movie1_id (int): The ID of the first movie to swap.
+            movie2_id (int): The ID of the second movie to swap.
 
         Raises:
-            ValueError: If you attempt to swap a song with itself.
+            ValueError: If you attempt to swap a movie with itself.
         """
-        logger.info("Swapping songs with IDs %d and %d", song1_id, song2_id)
+        logger.info("Swapping movies with IDs %d and %d", movie1_id, movie2_id)
         self.check_if_empty()
-        song1_id = self.validate_song_id(song1_id)
-        song2_id = self.validate_song_id(song2_id)
+        movie1_id = self.validate_movie_id(movie1_id)
+        movie2_id = self.validate_movie_id(movie2_id)
 
-        if song1_id == song2_id:
-            logger.error("Cannot swap a song with itself, both song IDs are the same: %d", song1_id)
-            raise ValueError(f"Cannot swap a song with itself, both song IDs are the same: {song1_id}")
+        if movie1_id == movie2_id:
+            logger.error("Cannot swap a movie with itself, both movie IDs are the same: %d", movie1_id)
+            raise ValueError(f"Cannot swap a movie with itself, both movie IDs are the same: {movie1_id}")
 
-        song1 = self.get_song_by_song_id(song1_id)
-        song2 = self.get_song_by_song_id(song2_id)
-        index1 = self.playlist.index(song1)
-        index2 = self.playlist.index(song2)
-        self.playlist[index1], self.playlist[index2] = self.playlist[index2], self.playlist[index1]
-        logger.info("Swapped songs with IDs %d and %d", song1_id, song2_id)
+        movie1 = self.get_movie_by_movie_id(movie1_id)
+        movie2 = self.get_movie_by_movie_id(movie2_id)
+        index1 = self.watchlist.index(movie1)
+        index2 = self.watchlist.index(movie2)
+        self.watchlist[index1], self.watchlist[index2] = self.watchlist[index2], self.watchlist[index1]
+        logger.info("Swapped movies with IDs %d and %d", movie1_id, movie2_id)
 
     ##################################################
-    # Playlist Playback Functions
+    # Watchlist Playback Functions
     ##################################################
 
-    def play_current_song(self) -> None:
+    def play_current_movie(self) -> None:
         """
-        Plays the current song.
+        Plays the current movie.
 
         Side-effects:
-            Updates the current track number.
-            Updates the play count for the song.
+            Updates the current film number.
+            Updates the watch count for the movie.
         """
         self.check_if_empty()
-        current_song = self.get_song_by_track_number(self.current_track_number)
-        logger.info("Playing song: %s (ID: %d) at track number: %d", current_song.title, current_song.id, self.current_track_number)
-        update_play_count(current_song.id)
-        logger.info("Updated play count for song: %s (ID: %d)", current_song.title, current_song.id)
-        previous_track_number = self.current_track_number
-        self.current_track_number = (self.current_track_number % self.get_playlist_length()) + 1
-        logger.info("Track number updated from %d to %d", previous_track_number, self.current_track_number)
+        current_movie = self.get_movie_by_film_number(self.current_film_number)
+        logger.info("Playing movie: %s (ID: %d) at film number: %d", current_movie.title, current_movie.id, self.current_film_number)
+        update_watch_count(current_movie.id)
+        logger.info("Updated watch count for movie: %s (ID: %d)", current_movie.title, current_movie.id)
+        previous_film_number = self.current_film_number
+        self.current_film_number = (self.current_film_number % self.get_watchlist_length()) + 1
+        logger.info("Film number updated from %d to %d", previous_film_number, self.current_film_number)
 
-    def play_entire_playlist(self) -> None:
+    def play_entire_watchlist(self) -> None:
         """
-        Plays the entire playlist.
+        Plays the entire watchlist.
 
         Side-effects:
-            Resets the current track number to 1.
-            Updates the play count for each song.
+            Resets the current film number to 1.
+            Updates the watch count for each movie.
         """
         self.check_if_empty()
-        logger.info("Starting to play the entire playlist.")
-        self.current_track_number = 1
-        logger.info("Reset current track number to 1.")
-        for _ in range(self.get_playlist_length()):
-            logger.info("Playing track number: %d", self.current_track_number)
-            self.play_current_song()
-        logger.info("Finished playing the entire playlist. Current track number reset to 1.")
+        logger.info("Starting to play the entire watchlist.")
+        self.current_film_number = 1
+        logger.info("Reset current film number to 1.")
+        for _ in range(self.get_watchlist_length()):
+            logger.info("Playing film number: %d", self.current_film_number)
+            self.play_current_movie()
+        logger.info("Finished playing the entire watchlist. Current film number reset to 1.")
 
-    def play_rest_of_playlist(self) -> None:
+    def play_rest_of_watchlist(self) -> None:
         """
-        Plays the rest of the playlist from the current track.
+        Plays the rest of the watchlist from the current film.
 
         Side-effects:
-            Updates the current track number back to 1.
-            Updates the play count for each song in the rest of the playlist.
+            Updates the current film number back to 1.
+            Updates the watch count for each movie in the rest of the watchlist.
         """
         self.check_if_empty()
-        logger.info("Starting to play the rest of the playlist from track number: %d", self.current_track_number)
-        for _ in range(self.get_playlist_length() - self.current_track_number + 1):
-            logger.info("Playing track number: %d", self.current_track_number)
-            self.play_current_song()
-        logger.info("Finished playing the rest of the playlist. Current track number reset to 1.")
+        logger.info("Starting to play the rest of the watchlist from film number: %d", self.current_film_number)
+        for _ in range(self.get_watchlist_length() - self.current_film_number + 1):
+            logger.info("Playing film number: %d", self.current_film_number)
+            self.play_current_movie()
+        logger.info("Finished playing the rest of the watchlist. Current film number reset to 1.")
 
-    def rewind_playlist(self) -> None:
+    def rewind_watchlist(self) -> None:
         """
-        Rewinds the playlist to the beginning.
+        Rewinds the watchlist to the beginning.
         """
         self.check_if_empty()
-        logger.info("Rewinding playlist to the beginning.")
-        self.current_track_number = 1
+        logger.info("Rewinding watchlist to the beginning.")
+        self.current_film_number = 1
 
     ##################################################
     # Utility Functions
     ##################################################
 
-    def validate_song_id(self, song_id: int, check_in_playlist: bool = True) -> int:
+    def validate_movie_id(self, movie_id: int, check_in_watchlist: bool = True) -> int:
         """
-        Validates the given song ID, ensuring it is a non-negative integer.
+        Validates the given movie ID, ensuring it is a non-negative integer.
 
         Args:
-            song_id (int): The song ID to validate.
-            check_in_playlist (bool, optional): If True, checks if the song ID exists in the playlist.
+            movie_id (int): The movie ID to validate.
+            check_in_watchlist (bool, optional): If True, checks if the movie ID exists in the watchlist.
                                                 If False, skips the check. Defaults to True.
 
         Raises:
-            ValueError: If the song ID is not a valid non-negative integer.
+            ValueError: If the movie ID is not a valid non-negative integer.
         """
         try:
-            song_id = int(song_id)
-            if song_id < 0:
-                logger.error("Invalid song id %d", song_id)
-                raise ValueError(f"Invalid song id: {song_id}")
+            movie_id = int(movie_id)
+            if movie_id < 0:
+                logger.error("Invalid movie id %d", movie_id)
+                raise ValueError(f"Invalid movie id: {movie_id}")
         except ValueError:
-            logger.error("Invalid song id %s", song_id)
-            raise ValueError(f"Invalid song id: {song_id}")
+            logger.error("Invalid movie id %s", movie_id)
+            raise ValueError(f"Invalid movie id: {movie_id}")
 
-        if check_in_playlist:
-            if song_id not in [song_in_playlist.id for song_in_playlist in self.playlist]:
-                logger.error("Song with id %d not found in playlist", song_id)
-                raise ValueError(f"Song with id {song_id} not found in playlist")
+        if check_in_watchlist:
+            if movie_id not in [movie_in_watchlist.id for movie_in_watchlist in self.watchlist]:
+                logger.error("Movie with id %d not found in watchlist", movie_id)
+                raise ValueError(f"Movie with id {movie_id} not found in watchlist")
 
-        return song_id
+        return movie_id
 
-    def validate_track_number(self, track_number: int) -> int:
+    def validate_film_number(self, film_number: int) -> int:
         """
-        Validates the given track number, ensuring it is a non-negative integer within the playlist's range.
+        Validates the given film number, ensuring it is a non-negative integer within the watchlist's range.
 
         Args:
-            track_number (int): The track number to validate.
+            film_number (int): The film number to validate.
 
         Raises:
-            ValueError: If the track number is not a valid non-negative integer or is out of range.
+            ValueError: If the film number is not a valid non-negative integer or is out of range.
         """
         try:
-            track_number = int(track_number)
-            if track_number < 1 or track_number > self.get_playlist_length():
-                logger.error("Invalid track number %d", track_number)
-                raise ValueError(f"Invalid track number: {track_number}")
+            film_number = int(film_number)
+            if film_number < 1 or film_number > self.get_watchlist_length():
+                logger.error("Invalid film number %d", film_number)
+                raise ValueError(f"Invalid film number: {film_number}")
         except ValueError:
-            logger.error("Invalid track number %s", track_number)
-            raise ValueError(f"Invalid track number: {track_number}")
+            logger.error("Invalid film number %s", film_number)
+            raise ValueError(f"Invalid film number: {film_number}")
 
-        return track_number
+        return film_number
 
     def check_if_empty(self) -> None:
         """
-        Checks if the playlist is empty, logs an error, and raises a ValueError if it is.
+        Checks if the watchlist is empty, logs an error, and raises a ValueError if it is.
 
         Raises:
-            ValueError: If the playlist is empty.
+            ValueError: If the watchlist is empty.
         """
-        if not self.playlist:
-            logger.error("Playlist is empty")
-            raise ValueError("Playlist is empty")
+        if not self.watchlist:
+            logger.error("Watchlist is empty")
+            raise ValueError("Watchlist is empty")
