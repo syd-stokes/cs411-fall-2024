@@ -1,140 +1,140 @@
 import logging
 from typing import List
-from music_collection.models.song_model import Song, update_play_count
-from music_collection.utils.logger import configure_logger
+from playlist.movie_collection.models.movie_model import Movie, update_watch_count
+from movie_collection.utils.logger import configure_logger
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
 
-class PlaylistModel:
+class WatchlistModel:
     """
-    A class to manage a playlist of songs.
+    A class to manage a watchist of movies.
 
     Attributes:
-        current_track_number (int): The current track number being played.
-        playlist (List[Song]): The list of songs in the playlist.
+        current_film_number (int): The current film number being watched.
+        watchlist (List[Movie]): The list of movies in the watchlist.
 
     """
 
     def __init__(self):
         """
-        Initializes the PlaylistModel with an empty playlist and the current track set to 1.
+        Initializes the WatchlistModel with an empty watchlist and the current film set to 1.
         """
-        self.current_track_number = 1
-        self.playlist: List[Song] = []
+        self.current_film_number = 1
+        self.watchlist: List[Movie] = []
         
     ##################################################
-    # Song Management Functions
+    # Movie Management Functions
     ##################################################
 
-    def add_song_to_playlist(self, song: Song) -> None:
+    def add_movie_to_watchlist(self, movie: Movie) -> None:
         """
-        Adds a song to the playlist.
+        Adds a movie to the watchlist.
 
         Args:
-            song (Song): the song to add to the playlist.
+            movie (Movie): the movie to add to the watchlist.
 
         Raises:
-            TypeError: If the song is not a valid Song instance.
-            ValueError: If a song with the same 'id' already exists.
+            TypeError: If the movie is not a valid Movie instance.
+            ValueError: If a movie with the same 'id' already exists.
         """
-        logger.info("Adding new song to playlist")
-        if not isinstance(song, Song):
-            logger.error("Song is not a valid song")
-            raise TypeError("Song is not a valid song")
+        logger.info("Adding new movie to watchlist")
+        if not isinstance(movie, Movie):
+            logger.error("Movie is not a valid movie")
+            raise TypeError("Movie is not a valid movie")
 
-        song_id = self.validate_song_id(song.id, check_in_playlist=False)
-        if song_id in [song_in_playlist.id for song_in_playlist in self.playlist]:
-            logger.error("Song with ID %d already exists in the playlist", song.id)
-            raise ValueError(f"Song with ID {song.id} already exists in the playlist")
+        movie_id = self.validate_movie_id(movie.id, check_in_watchlist=False)
+        if movie_id in [movie_in_watchlist.id for movie_in_watchlist in self.watchlist]:
+            logger.error("Movie with ID %d already exists in the watchlist", movie.id)
+            raise ValueError(f"Movie with ID {movie.id} already exists in the watchlist")
 
-        self.playlist.append(song)
+        self.playlist.append(movie)
 
-    def remove_song_by_song_id(self, song_id: int) -> None:
+    def remove_movie_by_movie_id(self, movie_id: int) -> None:
         """
-        Removes a song from the playlist by its song ID.
+        Removes a movie from the watchlist by its movie ID.
 
         Args:
-            song_id (int): The ID of the song to remove from the playlist.
+            movie_id (int): The ID of the movie to remove from the watchlist.
 
         Raises:
-            ValueError: If the playlist is empty or the song ID is invalid.
+            ValueError: If the watchlist is empty or the movie ID is invalid.
         """
-        logger.info("Removing song with id %d from playlist", song_id)
+        logger.info("Removing movie with id %d from watchlist", movie_id)
         self.check_if_empty()
-        song_id = self.validate_song_id(song_id)
-        self.playlist = [song_in_playlist for song_in_playlist in self.playlist if song_in_playlist.id != song_id]
-        logger.info("Song with id %d has been removed", song_id)
+        movie_id = self.validate_movie_id(movie_id)
+        self.watchlist = [movie_in_watchlist for movie_in_watchlist in self.watchlist if movie_in_watchlist.id != movie_id]
+        logger.info("Movie with id %d has been removed", movie_id)
 
-    def remove_song_by_track_number(self, track_number: int) -> None:
+    def remove_movie_by_film_number(self, film_number: int) -> None:
         """
-        Removes a song from the playlist by its track number (1-indexed).
+        Removes a movie from the watchlist by its film number (1-indexed).
 
         Args:
-            track_number (int): The track number of the song to remove.
+            film_number (int): The film number of the movie to remove.
 
         Raises:
-            ValueError: If the playlist is empty or the track number is invalid.
+            ValueError: If the watchlist is empty or the film number is invalid.
         """
-        logger.info("Removing song at track number %d from playlist", track_number)
+        logger.info("Removing movie at film number %d from playlist", film_number)
         self.check_if_empty()
-        track_number = self.validate_track_number(track_number)
-        playlist_index = track_number - 1
-        logger.info("Removing song: %s", self.playlist[playlist_index].title)
-        del self.playlist[playlist_index]
+        film_number = self.validate_film_number(film_number)
+        watchlist_index = film_number - 1
+        logger.info("Removing movie: %s", self.watchlist[watchlist_index].title)
+        del self.watchlist[watchlist_index]
 
-    def clear_playlist(self) -> None:
+    def clear_watchlist(self) -> None:
         """
-        Clears all songs from the playlist. If the playlist is already empty, logs a warning.
+        Clears all movies from the watchlist. If the watchlist is already empty, logs a warning.
         """
-        logger.info("Clearing playlist")
-        if self.get_playlist_length() == 0:
-            logger.warning("Clearing an empty playlist")
-        self.playlist.clear()
+        logger.info("Clearing watchlist")
+        if self.get_watchlist_length() == 0:
+            logger.warning("Clearing an empty watchlist")
+        self.watchlist.clear()
 
     ##################################################
-    # Playlist Retrieval Functions
+    # Watchlist Retrieval Functions
     ##################################################
 
-    def get_all_songs(self) -> List[Song]:
+    def get_all_movies(self) -> List[Movie]:
         """
-        Returns a list of all songs in the playlist.
+        Returns a list of all movies in the watchlist.
         """
         self.check_if_empty()
-        logger.info("Getting all songs in the playlist")
-        return self.playlist
+        logger.info("Getting all movies in the watchlist")
+        return self.watchlist
 
-    def get_song_by_song_id(self, song_id: int) -> Song:
+    def get_movie_by_movie_id(self, movie_id: int) -> Movie:
         """
-        Retrieves a song from the playlist by its song ID.
+        Retrieves a movie from the watchlist by its movie ID.
 
         Args:
-            song_id (int): The ID of the song to retrieve.
+            movie_id (int): The ID of the movie to retrieve.
 
         Raises:
-            ValueError: If the playlist is empty or the song is not found.
+            ValueError: If the watchlist is empty or the movie is not found.
         """
         self.check_if_empty()
-        song_id = self.validate_song_id(song_id)
-        logger.info("Getting song with id %d from playlist", song_id)
-        return next((song for song in self.playlist if song.id == song_id), None)
+        movie_id = self.validate_movie_id(movie_id)
+        logger.info("Getting movie with id %d from watchlist", movie_id)
+        return next((movie for movie in self.watchlist if movie.id == movie_id), None)
 
-    def get_song_by_track_number(self, track_number: int) -> Song:
+    def get_movie_by_film_number(self, film_number: int) -> Movie:
         """
-        Retrieves a song from the playlist by its track number (1-indexed).
+        Retrieves a movie from the watchlist by its film number (1-indexed).
 
         Args:
-            track_number (int): The track number of the song to retrieve.
+            film_number (int): The film number of the movie to retrieve.
 
         Raises:
-            ValueError: If the playlist is empty or the track number is invalid.
+            ValueError: If the watchlist is empty or the film number is invalid.
         """
         self.check_if_empty()
-        track_number = self.validate_track_number(track_number)
-        playlist_index = track_number - 1
-        logger.info("Getting song at track number %d from playlist", track_number)
-        return self.playlist[playlist_index]
+        film_number = self.validate_film_number(film_number)
+        watchlist_index = film_number - 1
+        logger.info("Getting movie at film number %d from watchlist", film_number)
+        return self.watchlist[watchlist_index]
 
     def get_current_song(self) -> Song:
         """

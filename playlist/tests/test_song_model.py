@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 
-from music_collection.models.song_model import (
+from playlist.movie_collection.models.movie_model import (
     Song,
     create_song,
     clear_catalog,
