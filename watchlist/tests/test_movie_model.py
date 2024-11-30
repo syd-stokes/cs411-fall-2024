@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 
-from watchlist.movie_collection.models.movie_model import (
+from movie_collection.models.movie_model import (
     Movie,
     create_movie,
     clear_catalog,
@@ -248,9 +248,9 @@ def test_get_all_movies(mock_cursor):
 
     # Simulate that there are multiple movies in the database
     mock_cursor.fetchall.return_value = [
-        {1, "Director A", "Movie A", 2020, "Comedy", 210, 4.3, 10, False},
-        {2, "Director B", "Movie B", 2021, "Action", 180, 9.2, 20, False},
-        {3, "Director C", "Movie C", 2022, "Thriller", 200, 7.5, 5, False}
+        (1, "Director A", "Movie A", 2020, "Comedy", 210, 4.3, 10, False),
+        (2, "Director B", "Movie B", 2021, "Action", 180, 9.2, 20, False),
+        (3, "Director C", "Movie C", 2022, "Thriller", 200, 7.5, 5, False)
     ]
 
     # Call the get_all_movies function
@@ -284,6 +284,8 @@ def test_get_all_movies_empty_catalog(mock_cursor, caplog):
     # Call the get_all_movies function
     result = get_all_movies()
 
+    rows = mock_cursor.fetchall()
+
     # Ensure the result is an empty list
     assert result == [], f"Expected empty list, but got {result}"
 
@@ -293,7 +295,7 @@ def test_get_all_movies_empty_catalog(mock_cursor, caplog):
     # Ensure the SQL query was executed correctly
     expected_query = normalize_whitespace("SELECT id, director, title, year, genre, duration, rating, watch_count FROM movies WHERE deleted = FALSE")
     actual_query = normalize_whitespace(mock_cursor.execute.call_args[0][0])
-
+    
     # Assert that the SQL query was correct
     assert actual_query == expected_query, "The SQL query did not match the expected structure."
 
@@ -335,15 +337,15 @@ def test_get_all_movies_ordered_by_rating(mock_cursor):
 
     # Simulate that there are multiple movies in the database
     mock_cursor.fetchall.return_value = [
-        (2, "Director B", "Movie B", 2021, "Comedy", 180, 4.3, 20),
         (1, "Director A", "Movie A", 2020, "Action", 210, 9.2, 10),
-        (3, "Director C", "Movie C", 2022, "Thriller", 200, 7.5, 5)
+        (3, "Director C", "Movie C", 2022, "Thriller", 200, 7.5, 5),
+        (2, "Director B", "Movie B", 2021, "Comedy", 180, 4.3, 20)
     ]
 
-    # Call the get_all_movies function with sort_by_watch_count = True
+    # Call the get_all_movies function with sort_by_rating = True
     movies = get_all_movies(sort_by_rating=True, sort_by_watch_count=False)
 
-    # Ensure the results are sorted by watch count
+    # Ensure the results are sorted by rating
     expected_result = [
         {"id": 1, "director": "Director A", "title": "Movie A", "year": 2020, "genre": "Action", "duration": 210, "rating" : 9.2,  "watch_count": 10},
         {"id": 3, "director": "Director C", "title": "Movie C", "year": 2022, "genre": "Thriller", "duration": 200, "rating" : 7.5,  "watch_count": 5},
@@ -409,7 +411,7 @@ def test_get_random_movie_empty_catalog(mock_cursor, mocker):
     mocker.patch("movie_collection.models.movie_model.get_random").assert_not_called()
 
     # Ensure the SQL query was executed correctly
-    expected_query = normalize_whitespace("SELECT id, director, title, year, genre, duration, ratingm watch_count FROM movies WHERE deleted = FALSE")
+    expected_query = normalize_whitespace("SELECT id, director, title, year, genre, duration, rating, watch_count FROM movies WHERE deleted = FALSE")
     actual_query = normalize_whitespace(mock_cursor.execute.call_args[0][0])
 
     # Assert that the SQL query was correct

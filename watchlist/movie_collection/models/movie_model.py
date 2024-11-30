@@ -51,7 +51,8 @@ def create_movie(director: str, title: str, year: int, genre: str, duration: int
         raise ValueError(f"Invalid rating provided: {rating} (must be a float between 0.0 and 10.0).")
     if not isinstance(duration, int) or duration <= 0:
         raise ValueError(f"Invalid movie duration: {duration} (must be a positive integer).")
-
+    if not isinstance(year, int) or year < 0:
+        raise ValueError(f"Invalid year provided: {year} (must be a positive integer).")
     try:
         # Use the context manager to handle the database connection
         with get_db_connection() as conn:
@@ -274,11 +275,13 @@ def get_all_movies(sort_by_rating: bool = False, sort_by_watch_count: bool = Fal
             if sort_clauses:
                 query += " ORDER BY " + ", ".join(sort_clauses)
 
+            logger.debug("Executing query: %s", query)
+
             cursor.execute(query)
             rows = cursor.fetchall()
 
             if not rows:
-                logger.warning("The watchlist is empty.")
+                logger.warning("The movie catalog is empty.")
                 return []
 
             # Map query results to a list of dictionaries

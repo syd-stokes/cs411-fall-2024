@@ -1,6 +1,6 @@
 import pytest
 
-from watchlist.movie_collection.models.watchlist_model import WatchlistModel
+from movie_collection.models.watchlist_model import WatchlistModel
 from watchlist.movie_collection.models.movie_model import Movie
 
 
@@ -259,6 +259,7 @@ def test_validate_film_number_invalid(watchlist_model, sample_movie1):
 
 def test_play_current_movie(watchlist_model, sample_watchlist, mock_update_watch_count):
     """Test playing the current movie."""
+
     watchlist_model.watchlist.extend(sample_watchlist)
 
     watchlist_model.play_current_movie()
@@ -318,4 +319,4 @@ def test_play_rest_of_watchlist(watchlist_model, sample_watchlist, mock_update_w
     mock_update_watch_count.assert_any_call(2)
     assert mock_update_watch_count.call_count == 1
 
-    assert watchlist_model.current_track_number == 1, "Expected to loop back to the beginning of the watchlist"
+    assert watchlist_model.current_film_number == 1, "Expected to loop back to the beginning of the watchlist"
