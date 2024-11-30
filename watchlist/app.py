@@ -141,9 +141,10 @@ def delete_movie(movie_id: int) -> Response:
 @app.route('/api/get-all-movies-from-catalog', methods=['GET'])
 def get_all_movies() -> Response:
     """
-    Route to retrieve all movies in the catalog (non-deleted), with an option to sort by watch count.
+    Route to retrieve all movies in the catalog (non-deleted), with an option to sort by watch count or rating.
 
     Query Parameter:
+        - sort_by_rating (bool, optional): If true, sort movies by rating in descending order.
         - sort_by_watch_count (bool, optional): If true, sort movies by watch count.
 
     Returns:
@@ -151,10 +152,17 @@ def get_all_movies() -> Response:
     """
     try:
         # Extract query parameter for sorting by watch count
+        sort_by_rating = request.args.get('sort_by_rating', 'false').lower() == 'true'
         sort_by_watch_count = request.args.get('sort_by_watch_count', 'false').lower() == 'true'
 
-        app.logger.info("Retrieving all movies from the catalog, sort_by_watch_count=%s", sort_by_watch_count)
-        movies = movie_model.get_all_movies(sort_by_watch_count=sort_by_watch_count)
+        # app.logger.info("Retrieving all movies from the catalog, sort_by_watch_count=%s", sort_by_watch_count)
+        # movies = movie_model.get_all_movies(sort_by_watch_count=sort_by_watch_count)
+
+        app.logger.info("Retrieving all movies from the watchlist, sort_by_rating=%s, sort_by_watch_count=%s",
+                        sort_by_rating, sort_by_watch_count)
+                        
+        # Get movies from the model
+        movies = watchlist_model.get_all_movies(sort_by_rating=sort_by_rating, sort_by_watch_count=sort_by_watch_count)
 
         return make_response(jsonify({'status': 'success', 'movies': movies}), 200)
     except Exception as e:
@@ -712,21 +720,43 @@ def swap_movies_in_watchlist() -> Response:
 @app.route('/api/movie-leaderboard', methods=['GET'])
 def get_movie_leaderboard() -> Response:
     """
-    Route to get a list of all sorted by watch count.
+    Route to get a list of all sorted by watch count or rating.
+
+    Query Parameters:
+        - sort_by_rating (bool, optional): If true, sort by rating in descending order.
+        - sort_by_watch_count (bool, optional): If true, sort by watch count in descending order.
 
     Returns:
         JSON response with a sorted leaderboard of movies.
     Raises:
         500 error if there is an issue generating the leaderboard.
     """
+#     try:
+#         app.logger.info("Generating movie leaderboard sorted")
+#         leaderboard_data = movie_model.get_all_movies(sort_by_watch_count=True)
+#         return make_response(jsonify({'status': 'success', 'leaderboard': leaderboard_data}), 200)
+#     except Exception as e:
+#         app.logger.error(f"Error generating leaderboard: {e}")
+#         return make_response(jsonify({'error': str(e)}), 500)
+
+
+# if __name__ == '__main__':
+#     app.run(debug=True, host='0.0.0.0', port=5000)
+
     try:
-        app.logger.info("Generating movie leaderboard sorted")
-        leaderboard_data = movie_model.get_all_movies(sort_by_watch_count=True)
+        # Extract sorting preferences from query parameters
+        sort_by_rating = request.args.get('sort_by_rating', 'false').lower() == 'true'
+        sort_by_watch_count = request.args.get('sort_by_watch_count', 'false').lower() == 'true'
+
+        app.logger.info("Generating movie leaderboard sorted by rating=%s, watch_count=%s",
+                        sort_by_rating, sort_by_watch_count)
+
+        # Fetch sorted movies from the model
+        leaderboard_data = movie_model.get_all_movies(sort_by_rating=sort_by_rating,
+                                                      sort_by_watch_count=sort_by_watch_count)
+
         return make_response(jsonify({'status': 'success', 'leaderboard': leaderboard_data}), 200)
+
     except Exception as e:
         app.logger.error(f"Error generating leaderboard: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
-
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)

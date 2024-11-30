@@ -49,109 +49,110 @@ check_db() {
 
 ##########################################################
 #
-# Song Management
+# Movie Management
 #
 ##########################################################
 
 clear_catalog() {
-  echo "Clearing the playlist..."
+  echo "Clearing the watchlist..."
   curl -s -X DELETE "$BASE_URL/clear-catalog" | grep -q '"status": "success"'
 }
 
-create_song() {
-  artist=$1
+create_movie() {
+  director=$1
   title=$2
   year=$3
   genre=$4
   duration=$5
+  rating=$6
 
-  echo "Adding song ($artist - $title, $year) to the playlist..."
-  curl -s -X POST "$BASE_URL/create-song" -H "Content-Type: application/json" \
-    -d "{\"artist\":\"$artist\", \"title\":\"$title\", \"year\":$year, \"genre\":\"$genre\", \"duration\":$duration}" | grep -q '"status": "success"'
+  echo "Adding movie ($director - $title, $year) to the watchlist..."
+  curl -s -X POST "$BASE_URL/create-movie" -H "Content-Type: application/json" \
+    -d "{\"director\":\"$director\", \"title\":\"$title\", \"year\":$year, \"genre\":\"$genre\", \"duration\":$duration, \"rating\":$rating}" | grep -q '"status": "success"'
 
   if [ $? -eq 0 ]; then
-    echo "Song added successfully."
+    echo "Movie added successfully."
   else
-    echo "Failed to add song."
+    echo "Failed to add movie."
     exit 1
   fi
 }
 
-delete_song_by_id() {
-  song_id=$1
+delete_movie_by_id() {
+  movie_id=$1
 
-  echo "Deleting song by ID ($song_id)..."
-  response=$(curl -s -X DELETE "$BASE_URL/delete-song/$song_id")
+  echo "Deleting movie by ID ($movie_id)..."
+  response=$(curl -s -X DELETE "$BASE_URL/delete-movie/$movie_id")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song deleted successfully by ID ($song_id)."
+    echo "Movie deleted successfully by ID ($movie_id)."
   else
-    echo "Failed to delete song by ID ($song_id)."
+    echo "Failed to delete movie by ID ($movie_id)."
     exit 1
   fi
 }
 
-get_all_songs() {
-  echo "Getting all songs in the playlist..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-songs-from-catalog")
+get_all_movies() {
+  echo "Getting all movies in the watchlist..."
+  response=$(curl -s -X GET "$BASE_URL/get-all-movies-from-catalog")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "All songs retrieved successfully."
+    echo "All movies retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Songs JSON:"
+      echo "Movies JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get songs."
+    echo "Failed to get movies."
     exit 1
   fi
 }
 
-get_song_by_id() {
-  song_id=$1
+get_movie_by_id() {
+  movie_id=$1
   
-  echo "Getting song by ID ($song_id)..."
-  response=$(curl -s -X GET "$BASE_URL/get-song-from-catalog-by-id/$song_id")
+  echo "Getting movie by ID ($movie_id)..."
+  response=$(curl -s -X GET "$BASE_URL/get-movie-from-catalog-by-id/$movie_id")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song retrieved successfully by ID ($song_id)."
+    echo "Movie retrieved successfully by ID ($movie_id)."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON (ID $song_id):"
+      echo "Movie JSON (ID $movie_id):"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get song by ID ($song_id)."
+    echo "Failed to get movie by ID ($movie_id)."
     exit 1
   fi
 }
 
-get_song_by_compound_key() {
-  artist=$1
+get_movie_by_compound_key() {
+  director=$1
   title=$2
   year=$3
 
-  echo "Getting song by compound key (Artist: '$artist', Title: '$title', Year: $year)..."
-  response=$(curl -s -X GET "$BASE_URL/get-song-from-catalog-by-compound-key?artist=$(echo $artist | sed 's/ /%20/g')&title=$(echo $title | sed 's/ /%20/g')&year=$year")
+  echo "Getting movie by compound key (Director: '$director', Title: '$title', Year: $year)..."
+  response=$(curl -s -X GET "$BASE_URL/get-movie-from-catalog-by-compound-key?director=$(echo $director | sed 's/ /%20/g')&title=$(echo $title | sed 's/ /%20/g')&year=$year")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song retrieved successfully by compound key."
+    echo "Movie retrieved successfully by compound key."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON (by compound key):"
+      echo "Movie JSON (by compound key):"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get song by compound key."
+    echo "Failed to get movie by compound key."
     exit 1
   fi
 }
 
-get_random_song() {
-  echo "Getting a random song from the catalog..."
-  response=$(curl -s -X GET "$BASE_URL/get-random-song")
+get_random_movie() {
+  echo "Getting a random movie from the catalog..."
+  response=$(curl -s -X GET "$BASE_URL/get-random-movie")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Random song retrieved successfully."
+    echo "Random movie retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Random Song JSON:"
+      echo "Random Movie JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get a random song."
+    echo "Failed to get a random movie."
     exit 1
   fi
 }
@@ -159,76 +160,76 @@ get_random_song() {
 
 ############################################################
 #
-# Playlist Management
+# Watchlist Management
 #
 ############################################################
 
-add_song_to_playlist() {
-  artist=$1
+add_movie_to_watchlist() {
+  director=$1
   title=$2
   year=$3
 
-  echo "Adding song to playlist: $artist - $title ($year)..."
-  response=$(curl -s -X POST "$BASE_URL/add-song-to-playlist" \
+  echo "Adding movie to watchlist: $director - $title ($year)..."
+  response=$(curl -s -X POST "$BASE_URL/add-movie-to-watchlist" \
     -H "Content-Type: application/json" \
-    -d "{\"artist\":\"$artist\", \"title\":\"$title\", \"year\":$year}")
+    -d "{\"director\":\"$director\", \"title\":\"$title\", \"year\":$year}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song added to playlist successfully."
+    echo "Movie added to watchlist successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON:"
+      echo "Movie JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to add song to playlist."
+    echo "Failed to add movie to watchlist."
     exit 1
   fi
 }
 
-remove_song_from_playlist() {
-  artist=$1
+remove_movie_from_watchlist() {
+  director=$1
   title=$2
   year=$3
 
-  echo "Removing song from playlist: $artist - $title ($year)..."
-  response=$(curl -s -X DELETE "$BASE_URL/remove-song-from-playlist" \
+  echo "Removing movie from watchlist: $director - $title ($year)..."
+  response=$(curl -s -X DELETE "$BASE_URL/remove-movie-from-watchlist" \
     -H "Content-Type: application/json" \
-    -d "{\"artist\":\"$artist\", \"title\":\"$title\", \"year\":$year}")
+    -d "{\"director\":\"$director\", \"title\":\"$title\", \"year\":$year}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song removed from playlist successfully."
+    echo "Movie removed from watchlist successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON:"
+      echo "Movie JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to remove song from playlist."
+    echo "Failed to remove movie from watchlist."
     exit 1
   fi
 }
 
-remove_song_by_track_number() {
-  track_number=$1
+remove_movie_by_film_number() {
+  film_number=$1
 
-  echo "Removing song by track number: $track_number..."
-  response=$(curl -s -X DELETE "$BASE_URL/remove-song-from-playlist-by-track-number/$track_number")
+  echo "Removing movie by film number: $film_number..."
+  response=$(curl -s -X DELETE "$BASE_URL/remove-movie-from-watchlist-by-film-number/$film_number")
 
   if echo "$response" | grep -q '"status":'; then
-    echo "Song removed from playlist by track number ($track_number) successfully."
+    echo "Movie removed from watchlist by film number ($film_number) successfully."
   else
-    echo "Failed to remove song from playlist by track number."
+    echo "Failed to remove movie from watchlist by film number."
     exit 1
   fi
 }
 
-clear_playlist() {
-  echo "Clearing playlist..."
-  response=$(curl -s -X POST "$BASE_URL/clear-playlist")
+clear_watchlist() {
+  echo "Clearing watchlist..."
+  response=$(curl -s -X POST "$BASE_URL/clear-watchlist")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Playlist cleared successfully."
+    echo "Watchlist cleared successfully."
   else
-    echo "Failed to clear playlist."
+    echo "Failed to clear watchlist."
     exit 1
   fi
 }
@@ -236,209 +237,209 @@ clear_playlist() {
 
 ############################################################
 #
-# Play Playlist
+# Play Watchlist
 #
 ############################################################
 
-play_current_song() {
-  echo "Playing current song..."
-  response=$(curl -s -X POST "$BASE_URL/play-current-song")
+play_current_movie() {
+  echo "Playing current movie..."
+  response=$(curl -s -X POST "$BASE_URL/play-current-movie")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Current song is now playing."
+    echo "Current movie is now playing."
   else
-    echo "Failed to play current song."
+    echo "Failed to play current movie."
     exit 1
   fi
 }
 
-rewind_playlist() {
-  echo "Rewinding playlist..."
-  response=$(curl -s -X POST "$BASE_URL/rewind-playlist")
+rewind_watchlist() {
+  echo "Rewinding watchlist..."
+  response=$(curl -s -X POST "$BASE_URL/rewind-watchlist")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Playlist rewound successfully."
+    echo "Watchlist rewound successfully."
   else
-    echo "Failed to rewind playlist."
+    echo "Failed to rewind watchlist."
     exit 1
   fi
 }
 
-get_all_songs_from_playlist() {
-  echo "Retrieving all songs from playlist..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-songs-from-playlist")
+get_all_movies_from_watchlist() {
+  echo "Retrieving all movies from watchlist..."
+  response=$(curl -s -X GET "$BASE_URL/get-all-movies-from-watchlist")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "All songs retrieved successfully."
+    echo "All movies retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Songs JSON:"
+      echo "Movies JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to retrieve all songs from playlist."
+    echo "Failed to retrieve all movies from watchlist."
     exit 1
   fi
 }
 
-get_song_from_playlist_by_track_number() {
-  track_number=$1
-  echo "Retrieving song by track number ($track_number)..."
-  response=$(curl -s -X GET "$BASE_URL/get-song-from-playlist-by-track-number/$track_number")
+get_movie_from_watchlist_by_film_number() {
+  film_number=$1
+  echo "Retrieving movie by film number ($film_number)..."
+  response=$(curl -s -X GET "$BASE_URL/get-movie-from-watchlist-by-film-number/$film_number")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song retrieved successfully by track number."
+    echo "Movie retrieved successfully by film number."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON:"
+      echo "Movie JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to retrieve song by track number."
+    echo "Failed to retrieve movie by film number."
     exit 1
   fi
 }
 
-get_current_song() {
-  echo "Retrieving current song..."
-  response=$(curl -s -X GET "$BASE_URL/get-current-song")
+get_current_movie() {
+  echo "Retrieving current movie..."
+  response=$(curl -s -X GET "$BASE_URL/get-current-movie")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Current song retrieved successfully."
+    echo "Current movie retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Current Song JSON:"
+      echo "Current Movie JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to retrieve current song."
+    echo "Failed to retrieve current movie."
     exit 1
   fi
 }
 
-get_playlist_length_duration() {
-  echo "Retrieving playlist length and duration..."
-  response=$(curl -s -X GET "$BASE_URL/get-playlist-length-duration")
+get_watchlist_length_duration() {
+  echo "Retrieving watchlist length and duration..."
+  response=$(curl -s -X GET "$BASE_URL/get-watchlist-length-duration")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Playlist length and duration retrieved successfully."
+    echo "Watchlist length and duration retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Playlist Info JSON:"
+      echo "Watchlist Info JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to retrieve playlist length and duration."
+    echo "Failed to retrieve watchlist length and duration."
     exit 1
   fi
 }
 
-go_to_track_number() {
-  track_number=$1
-  echo "Going to track number ($track_number)..."
-  response=$(curl -s -X POST "$BASE_URL/go-to-track-number/$track_number")
+go_to_film_number() {
+  film_number=$1
+  echo "Going to film number ($film_number)..."
+  response=$(curl -s -X POST "$BASE_URL/go-to-film-number/$film_number")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Moved to track number ($track_number) successfully."
+    echo "Moved to film number ($film_number) successfully."
   else
-    echo "Failed to move to track number ($track_number)."
+    echo "Failed to move to film number ($film_number)."
     exit 1
   fi
 }
 
-play_entire_playlist() {
-  echo "Playing entire playlist..."
-  curl -s -X POST "$BASE_URL/play-entire-playlist" | grep -q '"status": "success"'
+play_entire_watchlist() {
+  echo "Playing entire watchlist..."
+  curl -s -X POST "$BASE_URL/play-entire-watchlist" | grep -q '"status": "success"'
   if [ $? -eq 0 ]; then
-    echo "Entire playlist played successfully."
+    echo "Entire watchlist played successfully."
   else
-    echo "Failed to play entire playlist."
+    echo "Failed to play entire watchlist."
     exit 1
   fi
 }
 
-# Function to play the rest of the playlist
-play_rest_of_playlist() {
-  echo "Playing rest of the playlist..."
-  curl -s -X POST "$BASE_URL/play-rest-of-playlist" | grep -q '"status": "success"'
+# Function to play the rest of the watchlist
+play_rest_of_watchlist() {
+  echo "Playing rest of the watchlist..."
+  curl -s -X POST "$BASE_URL/play-rest-of-watchlist" | grep -q '"status": "success"'
   if [ $? -eq 0 ]; then
-    echo "Rest of playlist played successfully."
+    echo "Rest of watchlist played successfully."
   else
-    echo "Failed to play rest of playlist."
+    echo "Failed to play rest of watchlist."
     exit 1
   fi
 }
 
 ############################################################
 #
-# Arrange Playlist
+# Arrange Watchlist
 #
 ############################################################
 
-move_song_to_beginning() {
-  artist=$1
+move_movie_to_beginning() {
+  director=$1
   title=$2
   year=$3
 
-  echo "Moving song ($artist - $title, $year) to the beginning of the playlist..."
-  response=$(curl -s -X POST "$BASE_URL/move-song-to-beginning" \
+  echo "Moving movie ($director - $title, $year) to the beginning of the watchlist..."
+  response=$(curl -s -X POST "$BASE_URL/move-movie-to-beginning" \
     -H "Content-Type: application/json" \
-    -d "{\"artist\": \"$artist\", \"title\": \"$title\", \"year\": $year}")
+    -d "{\"director\": \"$director\", \"title\": \"$title\", \"year\": $year}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song moved to the beginning successfully."
+    echo "Movie moved to the beginning successfully."
   else
-    echo "Failed to move song to the beginning."
+    echo "Failed to move movie to the beginning."
     exit 1
   fi
 }
 
-move_song_to_end() {
-  artist=$1
+move_movie_to_end() {
+  director=$1
   title=$2
   year=$3
 
-  echo "Moving song ($artist - $title, $year) to the end of the playlist..."
-  response=$(curl -s -X POST "$BASE_URL/move-song-to-end" \
+  echo "Moving movie ($director - $title, $year) to the end of the watchlist..."
+  response=$(curl -s -X POST "$BASE_URL/move-movie-to-end" \
     -H "Content-Type: application/json" \
-    -d "{\"artist\": \"$artist\", \"title\": \"$title\", \"year\": $year}")
+    -d "{\"director\": \"$director\", \"title\": \"$title\", \"year\": $year}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song moved to the end successfully."
+    echo "Movie moved to the end successfully."
   else
-    echo "Failed to move song to the end."
+    echo "Failed to move movie to the end."
     exit 1
   fi
 }
 
-move_song_to_track_number() {
-  artist=$1
+move_movie_to_film_number() {
+  director=$1
   title=$2
   year=$3
-  track_number=$4
+  film_number=$4
 
-  echo "Moving song ($artist - $title, $year) to track number ($track_number)..."
-  response=$(curl -s -X POST "$BASE_URL/move-song-to-track-number" \
+  echo "Moving movie ($director - $title, $year) to film number ($film_number)..."
+  response=$(curl -s -X POST "$BASE_URL/move-movie-to-film-number" \
     -H "Content-Type: application/json" \
-    -d "{\"artist\": \"$artist\", \"title\": \"$title\", \"year\": $year, \"track_number\": $track_number}")
+    -d "{\"director\": \"$director\", \"title\": \"$title\", \"year\": $year, \"film_number\": $film_number}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song moved to track number ($track_number) successfully."
+    echo "Movie moved to film number ($film_number) successfully."
   else
-    echo "Failed to move song to track number ($track_number)."
+    echo "Failed to move movie to film number ($film_number)."
     exit 1
   fi
 }
 
-swap_songs_in_playlist() {
-  track_number1=$1
-  track_number2=$2
+swap_movies_in_watchlist() {
+  film_number1=$1
+  film_number2=$2
 
-  echo "Swapping songs at track numbers ($track_number1) and ($track_number2)..."
-  response=$(curl -s -X POST "$BASE_URL/swap-songs-in-playlist" \
+  echo "Swapping movies at film numbers ($film_number1) and ($film_number2)..."
+  response=$(curl -s -X POST "$BASE_URL/swap-movies-in-watchlist" \
     -H "Content-Type: application/json" \
-    -d "{\"track_number_1\": $track_number1, \"track_number_2\": $track_number2}")
+    -d "{\"film_number_1\": $film_number1, \"film_number_2\": $film_number2}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Songs swapped successfully between track numbers ($track_number1) and ($track_number2)."
+    echo "Movies swapped successfully between film numbers ($film_number1) and ($film_number2)."
   else
-    echo "Failed to swap songs."
+    echo "Failed to swap movies."
     exit 1
   fi
 }
@@ -449,21 +450,79 @@ swap_songs_in_playlist() {
 #
 ######################################################
 
-# Function to get the song leaderboard sorted by play count
-get_song_leaderboard() {
-  echo "Getting song leaderboard sorted by play count..."
-  response=$(curl -s -X GET "$BASE_URL/song-leaderboard?sort=play_count")
+# # Function to get the movie leaderboard sorted by watch count
+# get_movie_leaderboard() {
+#   echo "Getting movie leaderboard sorted by watch count..."
+#   response=$(curl -s -X GET "$BASE_URL/movie-leaderboard?sort=watch_count")
+#   if echo "$response" | grep -q '"status": "success"'; then
+#     echo "Movie leaderboard retrieved successfully."
+#     if [ "$ECHO_JSON" = true ]; then
+#       echo "Leaderboard JSON (sorted by watch count):"
+#       echo "$response" | jq .
+#     fi
+#   else
+#     echo "Failed to get movie leaderboard."
+#     exit 1
+#   fi
+# }
+
+# Function to get the movie leaderboard sorted by rating or watch count
+get_movie_leaderboard() {
+  echo "Getting movie leaderboard with various sorting options..."
+
+  # Test: Sort by watch count
+  response=$(curl -s -X GET "$BASE_URL/movie-leaderboard?sort_by_watch_count=true")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song leaderboard retrieved successfully."
+    echo "Movie leaderboard retrieved successfully (sorted by watch count)."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Leaderboard JSON (sorted by play count):"
+      echo "Leaderboard JSON (sorted by watch count):"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get song leaderboard."
+    echo "Failed to get movie leaderboard sorted by watch count."
+    exit 1
+  fi
+
+  # Test: Sort by rating
+  response=$(curl -s -X GET "$BASE_URL/movie-leaderboard?sort_by_rating=true")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Movie leaderboard retrieved successfully (sorted by rating)."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Leaderboard JSON (sorted by rating):"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get movie leaderboard sorted by rating."
+    exit 1
+  fi
+
+  # Test: Sort by both watch count and rating
+  response=$(curl -s -X GET "$BASE_URL/movie-leaderboard?sort_by_watch_count=true&sort_by_rating=true")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Movie leaderboard retrieved successfully (sorted by watch count and rating)."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Leaderboard JSON (sorted by watch count and rating):"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get movie leaderboard sorted by watch count and rating."
+    exit 1
+  fi
+
+  # Test: Default behavior (no sorting)
+  response=$(curl -s -X GET "$BASE_URL/movie-leaderboard")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Movie leaderboard retrieved successfully (default sorting)."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Leaderboard JSON (default sorting):"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get movie leaderboard with default sorting."
     exit 1
   fi
 }
+
 
 
 # Health checks
@@ -473,52 +532,52 @@ check_db
 # Clear the catalog
 clear_catalog
 
-# Create songs
-create_song "The Beatles" "Hey Jude" 1968 "Rock" 180
-create_song "The Rolling Stones" "Paint It Black" 1966 "Rock" 180
-create_song "The Beatles" "Let It Be" 1970 "Rock" 180
-create_song "Queen" "Bohemian Rhapsody" 1975 "Rock" 180
-create_song "Led Zeppelin" "Stairway to Heaven" 1971 "Rock" 180
+# Create movies
+create_movie "Jon M. Chu" "Wicked" 2024 "Musical" 160 8.2
+create_movie "Robert Zemeckis" "Forrest Gump" 1994 "Comedy" 144 8.8
+create_movie "Quentin Tarantino" "Pulp Fiction" 1994 "Action" 154 8.9
+create_movie "Nick Cassavetes" "The Notebook" 2004 "Romance" 123 7.8
+create_movie "Samuel Armstrong" "Dumbo" 1941 "Animation" 64 7.2
 
-delete_song_by_id 1
-get_all_songs
+delete_movie_by_id 1
+get_all_movies
 
-get_song_by_id 2
-get_song_by_compound_key "The Beatles" "Let It Be" 1970
-get_random_song
+get_movie_by_id 2
+get_movie_by_compound_key "Quentin Tarantino" "Pulp Fiction" 1994
+get_random_movie
 
-clear_playlist
+clear_watchlist
 
-add_song_to_playlist "The Rolling Stones" "Paint It Black" 1966
-add_song_to_playlist "Queen" "Bohemian Rhapsody" 1975
-add_song_to_playlist "Led Zeppelin" "Stairway to Heaven" 1971
-add_song_to_playlist "The Beatles" "Let It Be" 1970
+add_movie_to_watchlist "Quentin Tarantino" "Pulp Fiction" 1994
+add_movie_to_watchlist "Robert Zemeckis" "Forrest Gump" 1994
+add_movie_to_watchlist "Nick Cassavetes" "The Notebook" 2004 "Romance" 123 7.8
+add_movie_to_watchlist "Samuel Armstrong" "Dumbo" 1941 "Animation" 64 7.2
 
-remove_song_from_playlist "The Beatles" "Let It Be" 1970
-remove_song_by_track_number 2
+remove_movie_from_watchlist "Quentin Tarantino" "Pulp Fiction" 1994
+remove_movie_by_film_number 2
 
-get_all_songs_from_playlist
+get_all_movies_from_watchlist
 
-add_song_to_playlist "Queen" "Bohemian Rhapsody" 1975
-add_song_to_playlist "The Beatles" "Let It Be" 1970
+add_movie_to_watchlist "Robert Zemeckis" "Forrest Gump" 1994
+add_movie_to_watchlist "Quentin Tarantino" "Pulp Fiction" 1994
 
-move_song_to_beginning "The Beatles" "Let It Be" 1970
-move_song_to_end "Queen" "Bohemian Rhapsody" 1975
-move_song_to_track_number "Led Zeppelin" "Stairway to Heaven" 1971 2
-swap_songs_in_playlist 1 2
+move_movie_to_beginning "Quentin Tarantino" "Pulp Fiction" 1994
+move_movie_to_end "Robert Zemeckis" "Forrest Gump" 1994
+move_movie_to_film_number "Nick Cassavetes" "The Notebook" 2004 2
+swap_movies_in_watchlist 1 2
 
-get_all_songs_from_playlist
-get_song_from_playlist_by_track_number 1
+get_all_movies_from_watchlist
+get_movie_from_watchlist_by_film_number 1
 
-get_playlist_length_duration
+get_watchlist_length_duration
 
-play_current_song
-rewind_playlist
+watch_current_movie
+rewind_watchlist
 
-play_entire_playlist
-play_current_song
-play_rest_of_playlist
+play_entire_watchlist
+play_current_movie
+play_rest_of_watchlist
 
-get_song_leaderboard
+get_movie_leaderboard
 
 echo "All tests passed successfully!"

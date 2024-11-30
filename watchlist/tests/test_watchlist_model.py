@@ -1,311 +1,321 @@
 import pytest
 
-from playlist.movie_collection.models.watchlist_model import PlaylistModel
-from playlist.movie_collection.models.movie_model import Song
+from watchlist.movie_collection.models.watchlist_model import WatchlistModel
+from watchlist.movie_collection.models.movie_model import Movie
 
 
 @pytest.fixture()
-def playlist_model():
-    """Fixture to provide a new instance of PlaylistModel for each test."""
-    return PlaylistModel()
+def watchlist_model():
+    """Fixture to provide a new instance of WatchlistModel for each test."""
+    return WatchlistModel()
 
 @pytest.fixture
-def mock_update_play_count(mocker):
-    """Mock the update_play_count function for testing purposes."""
-    return mocker.patch("music_collection.models.playlist_model.update_play_count")
+def mock_update_watch_count(mocker):
+    """Mock the update_watch_count function for testing purposes."""
+    return mocker.patch("movie_collection.models.watchlist_model.update_watch_count")
 
-"""Fixtures providing sample songs for the tests."""
+"""Fixtures providing sample movies for the tests."""
 @pytest.fixture
-def sample_song1():
-    return Song(1, 'Artist 1', 'Song 1', 2022, 'Pop', 180)
-
-@pytest.fixture
-def sample_song2():
-    return Song(2, 'Artist 2', 'Song 2', 2021, 'Rock', 155)
+def sample_movie1():
+    return Movie(1, 'Director 1', 'Movie 1', 2022, 'Horror', 180, 1.2)
 
 @pytest.fixture
-def sample_playlist(sample_song1, sample_song2):
-    return [sample_song1, sample_song2]
+def sample_movie2():
+    return Movie(2, 'Director 2', 'Movie 2', 2021, 'Sci-Fi', 155, 9.9)
+
+@pytest.fixture
+def sample_watchlist(sample_movie1, sample_movie2):
+    return [sample_movie1, sample_movie2]
 
 
 ##################################################
-# Add Song Management Test Cases
+# Add Movie Management Test Cases
 ##################################################
 
-def test_add_song_to_playlist(playlist_model, sample_song1):
-    """Test adding a song to the playlist."""
-    playlist_model.add_song_to_playlist(sample_song1)
-    assert len(playlist_model.playlist) == 1
-    assert playlist_model.playlist[0].title == 'Song 1'
+def test_add_movie_to_watchlist(watchlist_model, sample_movie1):
+    """Test adding a movie to the watchlist."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
+    assert len(watchlist_model.watchlist) == 1
+    assert watchlist_model.watchlist[0].title == 'Movie 1'
 
-def test_add_duplicate_song_to_playlist(playlist_model, sample_song1):
-    """Test error when adding a duplicate song to the playlist by ID."""
-    playlist_model.add_song_to_playlist(sample_song1)
-    with pytest.raises(ValueError, match="Song with ID 1 already exists in the playlist"):
-        playlist_model.add_song_to_playlist(sample_song1)
-
-##################################################
-# Remove Song Management Test Cases
-##################################################
-
-def test_remove_song_from_playlist_by_song_id(playlist_model, sample_playlist):
-    """Test removing a song from the playlist by song_id."""
-    playlist_model.playlist.extend(sample_playlist)
-    assert len(playlist_model.playlist) == 2
-
-    playlist_model.remove_song_by_song_id(1)
-    assert len(playlist_model.playlist) == 1, f"Expected 1 song, but got {len(playlist_model.playlist)}"
-    assert playlist_model.playlist[0].id == 2, "Expected song with id 2 to remain"
-
-def test_remove_song_by_track_number(playlist_model, sample_playlist):
-    """Test removing a song from the playlist by track number."""
-    playlist_model.playlist.extend(sample_playlist)
-    assert len(playlist_model.playlist) == 2
-
-    # Remove song at track number 1 (first song)
-    playlist_model.remove_song_by_track_number(1)
-    assert len(playlist_model.playlist) == 1, f"Expected 1 song, but got {len(playlist_model.playlist)}"
-    assert playlist_model.playlist[0].id == 2, "Expected song with id 2 to remain"
-
-def test_clear_playlist(playlist_model, sample_song1):
-    """Test clearing the entire playlist."""
-    playlist_model.add_song_to_playlist(sample_song1)
-
-    playlist_model.clear_playlist()
-    assert len(playlist_model.playlist) == 0, "Playlist should be empty after clearing"
-
-def test_clear_playlist_empty_playlist(playlist_model, caplog):
-    """Test clearing the entire playlist when it's empty."""
-    playlist_model.clear_playlist()
-    assert len(playlist_model.playlist) == 0, "Playlist should be empty after clearing"
-    assert "Clearing an empty playlist" in caplog.text, "Expected warning message when clearing an empty playlist"
+def test_add_duplicate_movie_to_watchlist(watchlist_model, sample_movie1):
+    """Test error when adding a duplicate movie to the watchlist by ID."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
+    with pytest.raises(ValueError, match="Movie with ID 1 already exists in the watchlist"):
+        watchlist_model.add_movie_to_watchlist(sample_movie1)
 
 ##################################################
-# Tracklisting Management Test Cases
+# Remove Movie Management Test Cases
 ##################################################
 
-def test_move_song_to_track_number(playlist_model, sample_playlist):
-    """Test moving a song to a specific track number in the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_remove_movie_from_watchlist_by_movie_id(watchlist_model, sample_watchlist):
+    """Test removing a movie from the watchlist by movie_id."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+    assert len(watchlist_model.watchlist) == 2
 
-    playlist_model.move_song_to_track_number(2, 1)  # Move Song 2 to the first position
-    assert playlist_model.playlist[0].id == 2, "Expected Song 2 to be in the first position"
-    assert playlist_model.playlist[1].id == 1, "Expected Song 1 to be in the second position"
+    watchlist_model.remove_movie_by_movie_id(1)
+    assert len(watchlist_model.watchlist) == 1, f"Expected 1 movie, but got {len(watchlist_model.watchlist)}"
+    assert watchlist_model.watchlist[0].id == 2, "Expected movie with id 2 to remain"
 
-def test_swap_songs_in_playlist(playlist_model, sample_playlist):
-    """Test swapping the positions of two songs in the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_remove_movie_by_film_number(watchlist_model, sample_watchlist):
+    """Test removing a movie from the watchlist by film number."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+    assert len(watchlist_model.watchlist) == 2
 
-    playlist_model.swap_songs_in_playlist(1, 2)  # Swap positions of Song 1 and Song 2
-    assert playlist_model.playlist[0].id == 2, "Expected Song 2 to be in the first position"
-    assert playlist_model.playlist[1].id == 1, "Expected Song 1 to be in the second position"
+    # Remove movie at film number 1 (first movie)
+    watchlist_model.remove_movie_by_film_number(1)
+    assert len(watchlist_model.watchlist) == 1, f"Expected 1 movie, but got {len(watchlist_model.watchlist)}"
+    assert watchlist_model.watchlist[0].id == 2, "Expected movie with id 2 to remain"
 
-def test_swap_song_with_itself(playlist_model, sample_song1):
-    """Test swapping the position of a song with itself raises an error."""
-    playlist_model.add_song_to_playlist(sample_song1)
+def test_clear_watchlist(watchlist_model, sample_movie1):
+    """Test clearing the entire watchlist."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
 
-    with pytest.raises(ValueError, match="Cannot swap a song with itself"):
-        playlist_model.swap_songs_in_playlist(1, 1)  # Swap positions of Song 1 with itself
+    watchlist_model.clear_watchlist()
+    assert len(watchlist_model.watchlist) == 0, "Watchlist should be empty after clearing"
 
-def test_move_song_to_end(playlist_model, sample_playlist):
-    """Test moving a song to the end of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-
-    playlist_model.move_song_to_end(1)  # Move Song 1 to the end
-    assert playlist_model.playlist[1].id == 1, "Expected Song 1 to be at the end"
-
-def test_move_song_to_beginning(playlist_model, sample_playlist):
-    """Test moving a song to the beginning of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-
-    playlist_model.move_song_to_beginning(2)  # Move Song 2 to the beginning
-    assert playlist_model.playlist[0].id == 2, "Expected Song 2 to be at the beginning"
+def test_clear_watchlist_empty_watchlist(watchlist_model, caplog):
+    """Test clearing the entire watchlist when it's empty."""
+    watchlist_model.clear_watchlist()
+    assert len(watchlist_model.watchlist) == 0, "Watchlist should be empty after clearing"
+    assert "Clearing an empty watchlist" in caplog.text, "Expected warning message when clearing an empty watchlist"
 
 ##################################################
-# Song Retrieval Test Cases
+# Filmlisting Management Test Cases
 ##################################################
 
-def test_get_song_by_track_number(playlist_model, sample_playlist):
-    """Test successfully retrieving a song from the playlist by track number."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_move_movie_to_film_number(watchlist_model, sample_watchlist):
+    """Test moving a movie to a specific film number in the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
 
-    retrieved_song = playlist_model.get_song_by_track_number(1)
-    assert retrieved_song.id == 1
-    assert retrieved_song.title == 'Song 1'
-    assert retrieved_song.artist == 'Artist 1'
-    assert retrieved_song.year == 2022
-    assert retrieved_song.duration == 180
-    assert retrieved_song.genre == 'Pop'
+    watchlist_model.move_movie_to_film_number(2, 1)  # Move Movie 2 to the first position
+    assert watchlist_model.watchlist[0].id == 2, "Expected Movie 2 to be in the first position"
+    assert watchlist_model.watchlist[1].id == 1, "Expected Movie 1 to be in the second position"
 
-def test_get_all_songs(playlist_model, sample_playlist):
-    """Test successfully retrieving all songs from the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_move_movie_invalid_film_number(watchlist_model, sample_movie1):
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
+    with pytest.raises(ValueError, match="Invalid film number: 0"):
+        watchlist_model.move_movie_to_film_number(1, 0)  # Invalid film number
+    with pytest.raises(ValueError, match="Invalid film number: 2"):
+        watchlist_model.move_movie_to_film_number(1, 2)  # Out of range
 
-    all_songs = playlist_model.get_all_songs()
-    assert len(all_songs) == 2
-    assert all_songs[0].id == 1
-    assert all_songs[1].id == 2
+def test_swap_movies_in_watchlist(watchlist_model, sample_watchlist):
+    """Test swapping the positions of two movies in the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
 
-def test_get_song_by_song_id(playlist_model, sample_song1):
-    """Test successfully retrieving a song from the playlist by song ID."""
-    playlist_model.add_song_to_playlist(sample_song1)
+    watchlist_model.swap_movies_in_watchlist(1, 2)  # Swap positions of Movie 1 and Movie 2
+    assert watchlist_model.watchlist[0].id == 2, "Expected Movie 2 to be in the first position"
+    assert watchlist_model.watchlist[1].id == 1, "Expected Movie 1 to be in the second position"
 
-    retrieved_song = playlist_model.get_song_by_song_id(1)
+def test_swap_movie_with_itself(watchlist_model, sample_movie1):
+    """Test swapping the position of a movie with itself raises an error."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
 
-    assert retrieved_song.id == 1
-    assert retrieved_song.title == 'Song 1'
-    assert retrieved_song.artist == 'Artist 1'
-    assert retrieved_song.year == 2022
-    assert retrieved_song.duration == 180
-    assert retrieved_song.genre == 'Pop'
+    with pytest.raises(ValueError, match="Cannot swap a movie with itself"):
+        watchlist_model.swap_movies_in_watchlist(1, 1)  # Swap positions of Movie 1 with itself
 
-def test_get_current_song(playlist_model, sample_playlist):
-    """Test successfully retrieving the current song from the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_move_movie_to_end(watchlist_model, sample_watchlist):
+    """Test moving a movie to the end of the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
 
-    current_song = playlist_model.get_current_song()
-    assert current_song.id == 1
-    assert current_song.title == 'Song 1'
-    assert current_song.artist == 'Artist 1'
-    assert current_song.year == 2022
-    assert current_song.duration == 180
-    assert current_song.genre == 'Pop'
+    watchlist_model.move_movie_to_end(1)  # Move Movie 1 to the end
+    assert watchlist_model.watchlist[1].id == 1, "Expected Movie 1 to be at the end"
 
-def test_get_playlist_length(playlist_model, sample_playlist):
-    """Test getting the length of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-    assert playlist_model.get_playlist_length() == 2, "Expected playlist length to be 2"
+def test_move_movie_to_beginning(watchlist_model, sample_watchlist):
+    """Test moving a movie to the beginning of the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
 
-def test_get_playlist_duration(playlist_model, sample_playlist):
-    """Test getting the total duration of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-    assert playlist_model.get_playlist_duration() == 335, "Expected playlist duration to be 360 seconds"
+    watchlist_model.move_movie_to_beginning(2)  # Move Movie 2 to the beginning
+    assert watchlist_model.watchlist[0].id == 2, "Expected Movie 2 to be at the beginning"
+
+##################################################
+# Movie Retrieval Test Cases
+##################################################
+
+def test_get_movie_by_film_number(watchlist_model, sample_watchlist):
+    """Test successfully retrieving a movie from the watchlist by film number."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+
+    retrieved_movie = watchlist_model.get_movie_by_film_number(1)
+    assert retrieved_movie.id == 1
+    assert retrieved_movie.title == 'Movie 1'
+    assert retrieved_movie.director == 'Director 1'
+    assert retrieved_movie.year == 2022
+    assert retrieved_movie.duration == 180
+    assert retrieved_movie.genre == 'Horror'
+    assert retrieved_movie.rating == 1.2
+
+def test_get_all_movies(watchlist_model, sample_watchlist):
+    """Test successfully retrieving all movies from the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+
+    all_movies = watchlist_model.get_all_movies()
+    assert len(all_movies) == 2
+    assert all_movies[0].id == 1
+    assert all_movies[1].id == 2
+
+def test_get_movie_by_movie_id(watchlist_model, sample_movie1):
+    """Test successfully retrieving a movie from the watchlist by movie ID."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
+
+    retrieved_movie = watchlist_model.get_movie_by_movie_id(1)
+
+    assert retrieved_movie.id == 1
+    assert retrieved_movie.title == 'Movie 1'
+    assert retrieved_movie.director == 'Director 1'
+    assert retrieved_movie.year == 2022
+    assert retrieved_movie.duration == 180
+    assert retrieved_movie.genre == 'Horror'
+    assert retrieved_movie.rating == 1.2
+
+def test_get_current_movie(watchlist_model, sample_watchlist):
+    """Test successfully retrieving the current movie from the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+
+    current_movie = watchlist_model.get_current_movie()
+    assert current_movie.id == 1
+    assert current_movie.title == 'Movie 1'
+    assert current_movie.director == 'Director 1'
+    assert current_movie.year == 2022
+    assert current_movie.duration == 180
+    assert current_movie.genre == 'Horror'
+    assert current_movie.rating == 1.2
+
+def test_get_watchlist_length(watchlist_model, sample_watchlist):
+    """Test getting the length of the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+    assert watchlist_model.get_watchlist_length() == 2, "Expected watchlist length to be 2"
+
+def test_get_watchlist_duration(watchlist_model, sample_watchlist):
+    """Test getting the total duration of the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+    assert watchlist_model.get_watchlist_duration() == 335, "Expected watchlist duration to be 335 minutes"
 
 ##################################################
 # Utility Function Test Cases
 ##################################################
 
-def test_check_if_empty_non_empty_playlist(playlist_model, sample_song1):
-    """Test check_if_empty does not raise error if playlist is not empty."""
-    playlist_model.add_song_to_playlist(sample_song1)
+def test_check_if_empty_non_empty_watchlist(watchlist_model, sample_movie1):
+    """Test check_if_empty does not raise error if watchlist is not empty."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
     try:
-        playlist_model.check_if_empty()
+        watchlist_model.check_if_empty()
     except ValueError:
-        pytest.fail("check_if_empty raised ValueError unexpectedly on non-empty playlist")
+        pytest.fail("check_if_empty raised ValueError unexpectedly on non-empty watchlist")
 
-def test_check_if_empty_empty_playlist(playlist_model):
-    """Test check_if_empty raises error when playlist is empty."""
-    playlist_model.clear_playlist()
-    with pytest.raises(ValueError, match="Playlist is empty"):
-        playlist_model.check_if_empty()
+def test_check_if_empty_empty_watchlist(watchlist_model):
+    """Test check_if_empty raises error when watchlist is empty."""
+    watchlist_model.clear_watchlist()
+    with pytest.raises(ValueError, match="Watchlist is empty"):
+        watchlist_model.check_if_empty()
 
-def test_validate_song_id(playlist_model, sample_song1):
-    """Test validate_song_id does not raise error for valid song ID."""
-    playlist_model.add_song_to_playlist(sample_song1)
+def test_validate_movie_id(watchlist_model, sample_movie1):
+    """Test validate_movie_id does not raise error for valid movie ID."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
     try:
-        playlist_model.validate_song_id(1)
+        watchlist_model.validate_movie_id(1)
     except ValueError:
-        pytest.fail("validate_song_id raised ValueError unexpectedly for valid song ID")
+        pytest.fail("validate_movie_id raised ValueError unexpectedly for valid movie ID")
 
-def test_validate_song_id_no_check_in_playlist(playlist_model):
-    """Test validate_song_id does not raise error for valid song ID when the id isn't in the playlist."""
+def test_validate_movie_id_no_check_in_watchlist(watchlist_model):
+    """Test validate_movie_id does not raise error for valid movie ID when the id isn't in the watchlist."""
     try:
-        playlist_model.validate_song_id(1, check_in_playlist=False)
+        watchlist_model.validate_movie_id(1, check_in_watchlist=False)
     except ValueError:
-        pytest.fail("validate_song_id raised ValueError unexpectedly for valid song ID")
+        pytest.fail("validate_movie_id raised ValueError unexpectedly for valid movie ID")
 
-def test_validate_song_id_invalid_id(playlist_model):
-    """Test validate_song_id raises error for invalid song ID."""
-    with pytest.raises(ValueError, match="Invalid song id: -1"):
-        playlist_model.validate_song_id(-1)
+def test_validate_movie_id_invalid_id(watchlist_model):
+    """Test validate_movie_id raises error for invalid movie ID."""
+    with pytest.raises(ValueError, match="Invalid movie id: -1"):
+        watchlist_model.validate_movie_id(-1)
 
-    with pytest.raises(ValueError, match="Invalid song id: invalid"):
-        playlist_model.validate_song_id("invalid")
+    with pytest.raises(ValueError, match="Invalid movie id: invalid"):
+        watchlist_model.validate_movie_id("invalid")
 
-def test_validate_track_number(playlist_model, sample_song1):
-    """Test validate_track_number does not raise error for valid track number."""
-    playlist_model.add_song_to_playlist(sample_song1)
+def test_validate_film_number(watchlist_model, sample_movie1):
+    """Test validate_film_number does not raise error for valid film number."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
     try:
-        playlist_model.validate_track_number(1)
+        watchlist_model.validate_film_number(1)
     except ValueError:
-        pytest.fail("validate_track_number raised ValueError unexpectedly for valid track number")
+        pytest.fail("validate_film_number raised ValueError unexpectedly for valid film number")
 
-def test_validate_track_number_invalid(playlist_model, sample_song1):
-    """Test validate_track_number raises error for invalid track number."""
-    playlist_model.add_song_to_playlist(sample_song1)
+def test_validate_film_number_invalid(watchlist_model, sample_movie1):
+    """Test validate_film_number raises error for invalid film number."""
+    watchlist_model.add_movie_to_watchlist(sample_movie1)
 
-    with pytest.raises(ValueError, match="Invalid track number: 0"):
-        playlist_model.validate_track_number(0)
+    with pytest.raises(ValueError, match="Invalid film number: 0"):
+        watchlist_model.validate_film_number(0)
 
-    with pytest.raises(ValueError, match="Invalid track number: 2"):
-        playlist_model.validate_track_number(2)
+    with pytest.raises(ValueError, match="Invalid film number: 2"):
+        watchlist_model.validate_film_number(2)
 
-    with pytest.raises(ValueError, match="Invalid track number: invalid"):
-        playlist_model.validate_track_number("invalid")
+    with pytest.raises(ValueError, match="Invalid film number: invalid"):
+        watchlist_model.validate_film_number("invalid")
 
 ##################################################
-# Playback Test Cases
+# Watchback Test Cases
 ##################################################
 
-def test_play_current_song(playlist_model, sample_playlist, mock_update_play_count):
-    """Test playing the current song."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_play_current_movie(watchlist_model, sample_watchlist, mock_update_watch_count):
+    """Test playing the current movie."""
+    watchlist_model.watchlist.extend(sample_watchlist)
 
-    playlist_model.play_current_song()
+    watchlist_model.play_current_movie()
 
-    # Assert that CURRENT_TRACK_NUMBER has been updated to 2
-    assert playlist_model.current_track_number == 2, f"Expected track number to be 2, but got {playlist_model.current_track_number}"
+    # Assert that CURRENT_FILM_NUMBER has been updated to 2
+    assert watchlist_model.current_film_number == 2, f"Expected film number to be 2, but got {watchlist_model.current_film_number}"
 
-    # Assert that update_play_count was called with the id of the first song
-    mock_update_play_count.assert_called_once_with(1)
+    # Assert that update_watch_count was called with the id of the first movie
+    mock_update_watch_count.assert_called_once_with(1)
 
-    # Get the second song from the iterator (which will increment CURRENT_TRACK_NUMBER back to 1)
-    playlist_model.play_current_song()
+    # Get the second movie from the iterator (which will increment CURRENT_FILM_NUMBER back to 1)
+    watchlist_model.play_current_movie()
 
-    # Assert that CURRENT_TRACK_NUMBER has been updated back to 1
-    assert playlist_model.current_track_number == 1, f"Expected track number to be 1, but got {playlist_model.current_track_number}"
+    # Assert that CURRENT_FILM_NUMBER has been updated back to 1
+    assert watchlist_model.current_film_number == 1, f"Expected film number to be 1, but got {watchlist_model.current_film_number}"
 
-    # Assert that update_play_count was called with the id of the second song
-    mock_update_play_count.assert_called_with(2)
+    # Assert that update_watch_count was called with the id of the second movie
+    mock_update_watch_count.assert_called_with(2)
 
-def test_rewind_playlist(playlist_model, sample_playlist):
-    """Test rewinding the iterator to the beginning of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-    playlist_model.current_track_number = 2
+def test_rewind_watchlist(watchlist_model, sample_watchlist):
+    """Test rewinding the iterator to the beginning of the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+    watchlist_model.current_film_number = 2
 
-    playlist_model.rewind_playlist()
-    assert playlist_model.current_track_number == 1, "Expected to rewind to the first track"
+    watchlist_model.rewind_watchlist()
+    assert watchlist_model.current_film_number == 1, "Expected to rewind to the first film"
 
-def test_go_to_track_number(playlist_model, sample_playlist):
-    """Test moving the iterator to a specific track number in the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_go_to_film_number(watchlist_model, sample_watchlist):
+    """Test moving the iterator to a specific film number in the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
 
-    playlist_model.go_to_track_number(2)
-    assert playlist_model.current_track_number == 2, "Expected to be at track 2 after moving song"
+    watchlist_model.go_to_film_number(2)
+    assert watchlist_model.current_film_number == 2, "Expected to be at film 2 after moving movie"
 
-def test_play_entire_playlist(playlist_model, sample_playlist, mock_update_play_count):
-    """Test playing the entire playlist."""
-    playlist_model.playlist.extend(sample_playlist)
+def test_play_entire_watchlist(watchlist_model, sample_watchlist, mock_update_watch_count):
+    """Test playing the entire watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
 
-    playlist_model.play_entire_playlist()
+    watchlist_model.play_entire_watchlist()
 
-    # Check that all play counts were updated
-    mock_update_play_count.assert_any_call(1)
-    mock_update_play_count.assert_any_call(2)
-    assert mock_update_play_count.call_count == len(playlist_model.playlist)
+    # Check that all watch counts were updated
+    mock_update_watch_count.assert_any_call(1)
+    mock_update_watch_count.assert_any_call(2)
+    assert mock_update_watch_count.call_count == len(watchlist_model.watchlist)
 
-    # Check that the current track number was updated back to the first song
-    assert playlist_model.current_track_number == 1, "Expected to loop back to the beginning of the playlist"
+    # Check that the current film number was updated back to the first movie
+    assert watchlist_model.current_film_number == 1, "Expected to loop back to the beginning of the watchlist"
 
-def test_play_rest_of_playlist(playlist_model, sample_playlist, mock_update_play_count):
-    """Test playing from the current position to the end of the playlist."""
-    playlist_model.playlist.extend(sample_playlist)
-    playlist_model.current_track_number = 2
+def test_play_rest_of_watchlist(watchlist_model, sample_watchlist, mock_update_watch_count):
+    """Test playing from the current position to the end of the watchlist."""
+    watchlist_model.watchlist.extend(sample_watchlist)
+    watchlist_model.current_film_number = 2
 
-    playlist_model.play_rest_of_playlist()
+    watchlist_model.play_rest_of_watchlist()
 
-    # Check that play counts were updated for the remaining songs
-    mock_update_play_count.assert_any_call(2)
-    assert mock_update_play_count.call_count == 1
+    # Check that watch counts were updated for the remaining movies
+    mock_update_watch_count.assert_any_call(2)
+    assert mock_update_watch_count.call_count == 1
 
-    assert playlist_model.current_track_number == 1, "Expected to loop back to the beginning of the playlist"
+    assert watchlist_model.current_track_number == 1, "Expected to loop back to the beginning of the watchlist"

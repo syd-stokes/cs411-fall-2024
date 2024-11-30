@@ -57,7 +57,7 @@ def create_movie(director: str, title: str, year: int, genre: str, duration: int
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO movies (artist, title, year, genre, duration, rating)
+                INSERT INTO movies (director, title, year, genre, duration, rating)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (director, title, year, genre, duration, rating))
             conn.commit()
@@ -206,15 +206,16 @@ def get_movie_by_compound_key(director: str, title: str, year: int) -> Movie:
         logger.error("Database error while retrieving movie by compound key (director '%s', title '%s', year %d): %s", director, title, year, str(e))
         raise e
 
-def get_all_movies(sort_by_watch_count: bool = False) -> list[dict]:
+def get_all_movies(sort_by_rating: bool = False, sort_by_watch_count: bool = False) -> list[dict]:
     """
     Retrieves all movies that are not marked as deleted from the catalog.
 
     Args:
+        sort_by_rating (bool): If true, sort movies by rating in descending order.
         sort_by_watch_count (bool): If True, sort the movies by watch count in descending order.
 
     Returns:
-        list[dict]: A list of dictionaries representing all non-deleted movies with watch_count.
+        list[dict]: A list of dictionaries representing all non-deleted movies in watchlist.
 
     Logs:
         Warning: If the catalog is empty.
@@ -224,22 +225,63 @@ def get_all_movies(sort_by_watch_count: bool = False) -> list[dict]:
             cursor = conn.cursor()
             logger.info("Attempting to retrieve all non-deleted movies from the catalog")
 
-            # Determine the sort order based on the 'sort_by_watch_count' flag
+            # # Determine the sort order based on the 'sort_by_watch_count' flag
+            # query = """
+            #     SELECT id, director, title, year, genre, duration, rating, watch_count
+            #     FROM movies
+            #     WHERE deleted = FALSE
+            # """
+            # if sort_by_watch_count:
+            #     query += " ORDER BY watch_count DESC"
+
+            # cursor.execute(query)
+            # rows = cursor.fetchall()
+
+            # if not rows:
+            #     logger.warning("The movie catalog is empty.")
+            #     return []
+
+            # movies = [
+            #     {
+            #         "id": row[0],
+            #         "director": row[1],
+            #         "title": row[2],
+            #         "year": row[3],
+            #         "genre": row[4],
+            #         "duration": row[5],
+            #         "rating": row[6],
+            #         "watch_count": row[7],
+
+            #     }
+            #     for row in rows
+            # ]
+
+            # Base query for retrieving all movies
             query = """
-                SELECT id, artist, title, year, genre, duration, rating, watch_count
+                SELECT id, director, title, year, genre, duration, rating, watch_count
                 FROM movies
                 WHERE deleted = FALSE
             """
+
+            # Construct ORDER BY clause based on sorting parameters
+            sort_clauses = []
+            if sort_by_rating:
+                sort_clauses.append("rating DESC")
             if sort_by_watch_count:
-                query += " ORDER BY watch_count DESC"
+                sort_clauses.append("watch_count DESC")
+
+            # Add ORDER BY clause if any sorting is specified
+            if sort_clauses:
+                query += " ORDER BY " + ", ".join(sort_clauses)
 
             cursor.execute(query)
             rows = cursor.fetchall()
 
             if not rows:
-                logger.warning("The movie catalog is empty.")
+                logger.warning("The watchlist is empty.")
                 return []
 
+            # Map query results to a list of dictionaries
             movies = [
                 {
                     "id": row[0],
@@ -250,7 +292,6 @@ def get_all_movies(sort_by_watch_count: bool = False) -> list[dict]:
                     "duration": row[5],
                     "rating": row[6],
                     "watch_count": row[7],
-
                 }
                 for row in rows
             ]

@@ -18,7 +18,7 @@ def get_random(num_movies: int) -> int:
         RuntimeError: If the request to random.org fails or returns an invalid response.
         ValueError: If the response from random.org is not a valid float.
     """
-    url = f"https://www.random.org/integers/?num=1&min=1&max={num_smovies}&col=1&base=10&format=plain&rnd=new"
+    url = f"https://www.random.org/integers/?num=1&min=1&max={num_movies}&col=1&base=10&format=plain&rnd=new"
 
     try:
         # Log the request to random.org
