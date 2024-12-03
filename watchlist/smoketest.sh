@@ -26,9 +26,12 @@ done
 check_health() {
   echo "Checking health status..."
   curl -s -X GET "$BASE_URL/health" | grep -q '"status": "healthy"'
+  response=$(curl -s -X GET "$BASE_URL/health")
+  echo "Response: $response"
   if [ $? -eq 0 ]; then
     echo "Service is healthy."
   else
+    echo "BASE_URL is: $BASE_URL"
     echo "Health check failed."
     exit 1
   fi
@@ -38,9 +41,12 @@ check_health() {
 check_db() {
   echo "Checking database connection..."
   curl -s -X GET "$BASE_URL/db-check" | grep -q '"database_status": "healthy"'
+  response=$(curl -s -X GET "$BASE_URL/db-check")
+  echo "Response: $response"
   if [ $? -eq 0 ]; then
     echo "Database connection is healthy."
   else
+    echo "BASE_URL is: $BASE_URL"
     echo "Database check failed."
     exit 1
   fi
@@ -69,10 +75,12 @@ create_movie() {
   echo "Adding movie ($director - $title, $year) to the watchlist..."
   curl -s -X POST "$BASE_URL/create-movie" -H "Content-Type: application/json" \
     -d "{\"director\":\"$director\", \"title\":\"$title\", \"year\":$year, \"genre\":\"$genre\", \"duration\":$duration, \"rating\":$rating}" | grep -q '"status": "success"'
-
+  response=$(curl -s -X GET "$BASE_URL/create-movie")
+  echo "Response: $response"
   if [ $? -eq 0 ]; then
     echo "Movie added successfully."
   else
+    echo "BASE_URL is: $BASE_URL"
     echo "Failed to add movie."
     exit 1
   fi
@@ -83,9 +91,11 @@ delete_movie_by_id() {
 
   echo "Deleting movie by ID ($movie_id)..."
   response=$(curl -s -X DELETE "$BASE_URL/delete-movie/$movie_id")
-  if echo "$response" | grep -q '"status": "success"'; then
+  echo "Response: $response"
+  if echo "$response" | grep -q '"status": "movie deleted"'; then
     echo "Movie deleted successfully by ID ($movie_id)."
   else
+    echo "BASE_URL is: $BASE_URL"
     echo "Failed to delete movie by ID ($movie_id)."
     exit 1
   fi
@@ -173,6 +183,7 @@ add_movie_to_watchlist() {
   response=$(curl -s -X POST "$BASE_URL/add-movie-to-watchlist" \
     -H "Content-Type: application/json" \
     -d "{\"director\":\"$director\", \"title\":\"$title\", \"year\":$year}")
+  echo "Response: $response"
 
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Movie added to watchlist successfully."
@@ -181,6 +192,7 @@ add_movie_to_watchlist() {
       echo "$response" | jq .
     fi
   else
+    echo "BASE_URL is: $BASE_URL"
     echo "Failed to add movie to watchlist."
     exit 1
   fi
@@ -444,6 +456,8 @@ swap_movies_in_watchlist() {
   fi
 }
 
+
+
 ######################################################
 #
 # Leaderboard
@@ -522,8 +536,6 @@ get_movie_leaderboard() {
     exit 1
   fi
 }
-
-
 
 # Health checks
 check_health

@@ -1,6 +1,6 @@
 import pytest
 
-from movie_collection.models.watchlist_model import WatchlistModel
+from watchlist.movie_collection.models.watchlist_model import WatchlistModel
 from watchlist.movie_collection.models.movie_model import Movie
 
 
@@ -12,7 +12,7 @@ def watchlist_model():
 @pytest.fixture
 def mock_update_watch_count(mocker):
     """Mock the update_watch_count function for testing purposes."""
-    return mocker.patch("movie_collection.models.watchlist_model.update_watch_count")
+    return mocker.patch("watchlist.movie_collection.models.watchlist_model.update_watch_count")
 
 """Fixtures providing sample movies for the tests."""
 @pytest.fixture

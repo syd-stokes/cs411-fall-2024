@@ -1,7 +1,7 @@
 import logging
 from typing import List
 from watchlist.movie_collection.models.movie_model import Movie, update_watch_count
-from movie_collection.utils.logger import configure_logger
+from watchlist.movie_collection.utils.logger import configure_logger
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)

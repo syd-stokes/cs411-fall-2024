@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 
-from watchlist.movie_collection.models import movie_model
-from watchlist.movie_collection.models.watchlist_model import WatchlistModel
+from movie_collection.models import movie_model
+from movie_collection.models.watchlist_model import WatchlistModel
 from movie_collection.utils.sql_utils import check_database_connection, check_table_exists
 
 
@@ -132,7 +132,7 @@ def delete_movie(movie_id: int) -> Response:
     try:
         app.logger.info(f"Deleting movie by ID: {movie_id}")
         movie_model.delete_movie(movie_id)
-        return make_response(jsonify({'status': 'success'}), 200)
+        return make_response(jsonify({'status': 'movie deleted'}), 200)
     except Exception as e:
         app.logger.error(f"Error deleting movie: {e}")
         return make_response(jsonify({'error': str(e)}), 500)

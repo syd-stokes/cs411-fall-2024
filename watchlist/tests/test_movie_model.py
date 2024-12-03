@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 
-from movie_collection.models.movie_model import (
+from watchlist.movie_collection.models.movie_model import (
     Movie,
     create_movie,
     clear_catalog,
@@ -42,7 +42,7 @@ def mock_cursor(mocker):
     def mock_get_db_connection():
         yield mock_conn  # Yield the mocked connection object
 
-    mocker.patch("movie_collection.models.movie_model.get_db_connection", mock_get_db_connection)
+    mocker.patch("watchlist.movie_collection.models.movie_model.get_db_connection", mock_get_db_connection)
 
     return mock_cursor  # Return the mock cursor so we can set expectations per test
 
@@ -376,7 +376,7 @@ def test_get_random_movie(mock_cursor, mocker):
     ]
 
     # Mock random number generation to return the 2nd movie
-    mock_random = mocker.patch("movie_collection.models.movie_model.get_random", return_value=2)
+    mock_random = mocker.patch("watchlist.movie_collection.models.movie_model.get_random", return_value=2)
 
     # Call the get_random_movie method
     result = get_random_movie()
