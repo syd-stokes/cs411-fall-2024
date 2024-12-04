@@ -94,9 +94,9 @@ def add_movie() -> Response:
             return make_response(jsonify({'error': 'Invalid input, all fields are required with valid values'}), 400)
 
         # Add the movie to the watchlist
-        app.logger.info('Adding movie: %s - %s', director, title)
+        app.logger.info('Creating movie: %s - %s', director, title)
         movie_model.create_movie(director=director, title=title, year=year, genre=genre, duration=duration, rating=rating)
-        app.logger.info("Movie added to watchlist: %s - %s", director, title)
+        app.logger.info("Movie created: %s - %s", director, title)
         return make_response(jsonify({'status': 'success', 'movie': title}), 201)
     except Exception as e:
         app.logger.error("Failed to add movie: %s", str(e))
@@ -155,14 +155,12 @@ def get_all_movies() -> Response:
         sort_by_rating = request.args.get('sort_by_rating', 'false').lower() == 'true'
         sort_by_watch_count = request.args.get('sort_by_watch_count', 'false').lower() == 'true'
 
-        # app.logger.info("Retrieving all movies from the catalog, sort_by_watch_count=%s", sort_by_watch_count)
-        # movies = movie_model.get_all_movies(sort_by_watch_count=sort_by_watch_count)
-
         app.logger.info("Retrieving all movies from the watchlist, sort_by_rating=%s, sort_by_watch_count=%s",
                         sort_by_rating, sort_by_watch_count)
                         
         # Get movies from the model
-        movies = watchlist_model.get_all_movies(sort_by_rating=sort_by_rating, sort_by_watch_count=sort_by_watch_count)
+        app.logger.info("Getting all movies in the watchlist from movie_model")
+        movies = movie_model.get_all_movies_movie_model(sort_by_rating=sort_by_rating, sort_by_watch_count=sort_by_watch_count)
 
         return make_response(jsonify({'status': 'success', 'movies': movies}), 200)
     except Exception as e:
@@ -648,7 +646,7 @@ def move_movie_to_film_number() -> Response:
     Route to move a movie to a specific film number in the watchlist.
 
     Expected JSON Input:
-        - artist (str): The artist of the movie.
+        - director (str): The director of the movie.
         - title (str): The title of the movie.
         - year (int): The year the movie was released.
         - film_number (int): The new film number to move the movie to.
@@ -659,18 +657,21 @@ def move_movie_to_film_number() -> Response:
     try:
         data = request.get_json()
 
-        artist = data.get('artist')
+        director = data.get('director')
         title = data.get('title')
         year = data.get('year')
         film_number = data.get('film_number')
 
-        app.logger.info(f"Moving movie to film number {film_number}: {artist} - {title} ({year})")
+        app.logger.info(f"Moving movie to film number {film_number}: {director} - {title} ({year})")
 
         # Retrieve movie by compound key and move it to the specified film number
-        movie = movie_model.get_movie_by_compound_key(artist, title, year)
+        movie = movie_model.get_movie_by_compound_key(director, title, year)
+        if not movie:
+            app.logger.error(f"Movie not found with provided details: {director}, {title}, {year}")
+            raise ValueError("Movie not found")
         watchlist_model.move_movie_to_film_number(movie.id, film_number)
 
-        return make_response(jsonify({'status': 'success', 'movie': f'{artist} - {title}', 'film_number': film_number}), 200)
+        return make_response(jsonify({'status': 'success', 'movie': f'{director} - {title}', 'film_number': film_number}), 200)
     except Exception as e:
         app.logger.error(f"Error moving movie to film number: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
@@ -740,9 +741,6 @@ def get_movie_leaderboard() -> Response:
 #         return make_response(jsonify({'error': str(e)}), 500)
 
 
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0', port=5000)
-
     try:
         # Extract sorting preferences from query parameters
         sort_by_rating = request.args.get('sort_by_rating', 'false').lower() == 'true'
@@ -752,7 +750,7 @@ def get_movie_leaderboard() -> Response:
                         sort_by_rating, sort_by_watch_count)
 
         # Fetch sorted movies from the model
-        leaderboard_data = movie_model.get_all_movies(sort_by_rating=sort_by_rating,
+        leaderboard_data = movie_model.get_all_movies_movie_model(sort_by_rating=sort_by_rating,
                                                       sort_by_watch_count=sort_by_watch_count)
 
         return make_response(jsonify({'status': 'success', 'leaderboard': leaderboard_data}), 200)
@@ -760,3 +758,6 @@ def get_movie_leaderboard() -> Response:
     except Exception as e:
         app.logger.error(f"Error generating leaderboard: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
+    
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)

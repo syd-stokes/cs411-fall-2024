@@ -1,6 +1,7 @@
 import logging
 from typing import List
 from movie_collection.models.movie_model import Movie, update_watch_count
+from movie_collection.models import movie_model
 from movie_collection.utils.logger import configure_logger
 
 logger = logging.getLogger(__name__)
@@ -104,6 +105,13 @@ class WatchlistModel:
         self.check_if_empty()
         logger.info("Getting all movies in the watchlist")
         return self.watchlist
+    
+    # (please dont delete v)
+        # def get_all_movies(self, sort_by_rating: bool = False, sort_by_watch_count: bool = False) -> List[Movie]:
+        #     logger.info("Getting all movies in the watchlist from movie_model")
+        #     return movie_model.get_all_movies(sort_by_rating=sort_by_rating, sort_by_watch_count=sort_by_watch_count)
+    # (please dont delete ^)
+
 
     def get_movie_by_movie_id(self, movie_id: int) -> Movie:
         """
@@ -215,6 +223,9 @@ class WatchlistModel:
         film_number = self.validate_film_number(film_number)
         watchlist_index = film_number - 1
         movie = self.get_movie_by_movie_id(movie_id)
+        if self.watchlist.index(movie) == watchlist_index:
+            logger.info("Movie is already at the desired position.")
+            return
         self.watchlist.remove(movie)
         self.watchlist.insert(watchlist_index, movie)
         logger.info("Movie with ID %d has been moved to film number %d", movie_id, film_number)

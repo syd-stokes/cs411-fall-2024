@@ -207,7 +207,7 @@ def get_movie_by_compound_key(director: str, title: str, year: int) -> Movie:
         logger.error("Database error while retrieving movie by compound key (director '%s', title '%s', year %d): %s", director, title, year, str(e))
         raise e
 
-def get_all_movies(sort_by_rating: bool = False, sort_by_watch_count: bool = False) -> list[dict]:
+def get_all_movies_movie_model(sort_by_rating: bool = False, sort_by_watch_count: bool = False) -> list[dict]:
     """
     Retrieves all movies that are not marked as deleted from the catalog.
 
@@ -313,21 +313,31 @@ def get_random_movie() -> Movie:
         Movie: A randomly selected Movie object.
 
     Raises:
-        ValueError: If the catalog is empty.
+        ValueError: If the catalog is empty or random index generation fails.
     """
     try:
-        all_movies = get_all_movies()
+        all_movies = get_all_movies_movie_model()
 
         if not all_movies:
-            logger.info("Cannot retrieve random movie because the movie catalog is empty.")
+            logger.warning("Cannot retrieve random movie because the catalog is empty.")
             raise ValueError("The movie catalog is empty.")
 
-        # Get a random index using the random.org API
-        random_index = get_random(len(all_movies))
-        logger.info("Random index selected: %d (total movies: %d)", random_index, len(all_movies))
+        # Fetch a valid random index
+        try:
+            random_index = get_random(len(all_movies)) - 1  # Adjust for 0-based indexing
+            if not (0 <= random_index < len(all_movies)):
+                raise IndexError("Random index out of bounds.")
+        except Exception as e:
+            logger.error("Error generating random index: %s", str(e))
+            raise ValueError("Error generating random index.")
 
-        # Return the movie at the random index, adjust for 0-based indexing
-        movie_data = all_movies[random_index - 1]
+        # Fetch the movie data and construct a Movie object
+        movie_data = all_movies[random_index]
+        required_keys = {"id", "director", "title", "year", "genre", "duration", "rating"}
+        if not required_keys.issubset(movie_data.keys()):
+            logger.error("Invalid movie data: %s", movie_data)
+            raise ValueError("Movie data is incomplete or invalid.")
+
         return Movie(
             id=movie_data["id"],
             director=movie_data["director"],
@@ -341,6 +351,7 @@ def get_random_movie() -> Movie:
     except Exception as e:
         logger.error("Error while retrieving random movie: %s", str(e))
         raise e
+
 
 def update_watch_count(movie_id: int) -> None:
     """

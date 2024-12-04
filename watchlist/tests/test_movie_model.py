@@ -11,7 +11,7 @@ from movie_collection.models.movie_model import (
     delete_movie,
     get_movie_by_id,
     get_movie_by_compound_key,
-    get_all_movies,
+    get_all_movies_movie_model,
     get_random_movie,
     update_watch_count
 )
@@ -243,7 +243,7 @@ def test_get_movie_by_compound_key(mock_cursor):
     expected_arguments = ("Director Name", "Movie Title", 2022)
     assert actual_arguments == expected_arguments, f"The SQL query arguments did not match. Expected {expected_arguments}, got {actual_arguments}."
 
-def test_get_all_movies(mock_cursor):
+def test_get_all_movies_movie_model(mock_cursor):
     """Test retrieving all movies that are not marked as deleted."""
 
     # Simulate that there are multiple movies in the database
@@ -254,7 +254,7 @@ def test_get_all_movies(mock_cursor):
     ]
 
     # Call the get_all_movies function
-    movies = get_all_movies()
+    movies = get_all_movies_movie_model()
 
     # Ensure the results match the expected output
     expected_result = [
@@ -282,7 +282,7 @@ def test_get_all_movies_empty_catalog(mock_cursor, caplog):
     mock_cursor.fetchall.return_value = []
 
     # Call the get_all_movies function
-    result = get_all_movies()
+    result = get_all_movies_movie_model()
 
     rows = mock_cursor.fetchall()
 
@@ -310,7 +310,7 @@ def test_get_all_movies_ordered_by_watch_count(mock_cursor):
     ]
 
     # Call the get_all_movies function with sort_by_watch_count = True
-    movies = get_all_movies(sort_by_rating=False, sort_by_watch_count=True)
+    movies = get_all_movies_movie_model(sort_by_rating=False, sort_by_watch_count=True)
 
     # Ensure the results are sorted by watch count
     expected_result = [
@@ -343,7 +343,7 @@ def test_get_all_movies_ordered_by_rating(mock_cursor):
     ]
 
     # Call the get_all_movies function with sort_by_rating = True
-    movies = get_all_movies(sort_by_rating=True, sort_by_watch_count=False)
+    movies = get_all_movies_movie_model(sort_by_rating=True, sort_by_watch_count=False)
 
     # Ensure the results are sorted by rating
     expected_result = [
@@ -445,7 +445,7 @@ def test_update_watch_count(mock_cursor):
     expected_arguments = (movie_id,)
     assert actual_arguments == expected_arguments, f"The SQL query arguments did not match. Expected {expected_arguments}, got {actual_arguments}."
 
-### Test for Updating a Deleted Movie:
+# Test for Updating a Deleted Movie:
 def test_update_watch_count_deleted_movie(mock_cursor):
     """Test error when trying to update watch count for a deleted movie."""
 

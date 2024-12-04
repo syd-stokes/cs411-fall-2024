@@ -22,6 +22,8 @@ if [ ! -d "${DB_VOLUME_PATH}" ]; then
   mkdir -p ${DB_VOLUME_PATH}
 fi
 
+docker rm -f watchlist_container
+
 # Run the Docker container with the necessary ports and volume mappings
 echo "Running Docker container..."
 docker run -d \

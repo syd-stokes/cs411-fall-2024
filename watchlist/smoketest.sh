@@ -72,13 +72,13 @@ create_movie() {
   duration=$5
   rating=$6
 
-  echo "Adding movie ($director - $title, $year) to the watchlist..."
-  curl -s -X POST "$BASE_URL/create-movie" -H "Content-Type: application/json" \
-    -d "{\"director\":\"$director\", \"title\":\"$title\", \"year\":$year, \"genre\":\"$genre\", \"duration\":$duration, \"rating\":$rating}" | grep -q '"status": "success"'
-  response=$(curl -s -X GET "$BASE_URL/create-movie")
-  echo "Response: $response"
+  echo "Creating movie ($director - $title, $year)..."
+    response=$(curl -s -X POST "$BASE_URL/create-movie" \
+        -H "Content-Type: application/json" \
+        -d "{\"director\":\"$director\", \"title\":\"$title\", \"year\":$year, \"genre\":\"$genre\", \"duration\":$duration, \"rating\":$rating}")
+    echo "Response: $response"
   if [ $? -eq 0 ]; then
-    echo "Movie added successfully."
+    echo "Movie created successfully."
   else
     echo "BASE_URL is: $BASE_URL"
     echo "Failed to add movie."
@@ -101,18 +101,36 @@ delete_movie_by_id() {
   fi
 }
 
+# get_all_movies() {
+#   echo "Getting all movies in the watchlist..."
+#   response=$(curl -s -X GET "$BASE_URL/get-all-movies-from-catalog")
+#   echo "Response: $response"
+#   if echo "$response" | grep -q '"status": "success"'; then
+#     echo "All movies retrieved successfully."
+#     if [ "$ECHO_JSON" = true ]; then
+#       echo "Movies JSON:"
+#       echo "$response" | jq .
+#     fi
+#   else
+#     echo "BASE_URL is: $BASE_URL"
+#     echo "Failed to get movies."
+#     exit 1
+#   fi
+# }
 get_all_movies() {
+  sort_by_rating=$1
+  sort_by_watch_count=$2
+
   echo "Getting all movies in the watchlist..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-movies-from-catalog")
+  response=$(curl -s -X GET "$BASE_URL/get-all-movies-from-catalog?sort_by_rating=$sort_by_rating&sort_by_watch_count=$sort_by_watch_count")
   echo "Response: $response"
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "All movies retrieved successfully."
+    echo "Movies retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
       echo "Movies JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "BASE_URL is: $BASE_URL"
     echo "Failed to get movies."
     exit 1
   fi
@@ -181,7 +199,7 @@ add_movie_to_watchlist() {
   title=$2
   year=$3
 
-  echo "Adding movie to watchlist: $director - $title ($year)..."
+  echo "Adding movie: $director - $title ($year) to watchlist..."
   response=$(curl -s -X POST "$BASE_URL/add-movie-to-watchlist" \
     -H "Content-Type: application/json" \
     -d "{\"director\":\"$director\", \"title\":\"$title\", \"year\":$year}")
@@ -430,9 +448,8 @@ move_movie_to_film_number() {
 
   echo "Moving movie ($director - $title, $year) to film number ($film_number)..."
   response=$(curl -s -X POST "$BASE_URL/move-movie-to-film-number" \
-    -H "Content-Type: application/json" \
-    -d "{\"director\": \"$director\", \"title\": \"$title\", \"year\": $year, \"film_number\": $film_number}")
-
+  -H "Content-Type: application/json" \
+  -d "{\"director\": \"$director\", \"title\": \"$title\", \"year\": $year, \"film_number\": $film_number}")
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Movie moved to film number ($film_number) successfully."
   else
@@ -545,6 +562,7 @@ check_db
 
 # Clear the catalog
 clear_catalog
+clear_watchlist
 
 # Create movies
 create_movie "Jon M. Chu" "Wicked" 2024 "Musical" 160 8.2
@@ -553,8 +571,15 @@ create_movie "Quentin Tarantino" "Pulp Fiction" 1994 "Action" 154 8.9
 create_movie "Nick Cassavetes" "The Notebook" 2004 "Romance" 123 7.8
 create_movie "Samuel Armstrong" "Dumbo" 1941 "Animation" 64 7.2
 
+add_movie_to_watchlist "Quentin Tarantino" "Pulp Fiction" 1994
+add_movie_to_watchlist "Robert Zemeckis" "Forrest Gump" 1994
+add_movie_to_watchlist "Nick Cassavetes" "The Notebook" 2004 "Romance" 123 7.8
+add_movie_to_watchlist "Samuel Armstrong" "Dumbo" 1941 "Animation" 64 7.2
+
 delete_movie_by_id 1
-get_all_movies
+get_all_movies "true" "false"  # Sort by rating
+get_all_movies "false" "true" # Sort by watch count
+get_all_movies "false" "false" # Default sorting
 
 get_movie_by_id 2
 get_movie_by_compound_key "Quentin Tarantino" "Pulp Fiction" 1994
@@ -572,12 +597,13 @@ remove_movie_by_film_number 2
 
 get_all_movies_from_watchlist
 
-add_movie_to_watchlist "Robert Zemeckis" "Forrest Gump" 1994
+# add_movie_to_watchlist "Robert Zemeckis" "Forrest Gump" 1994
 add_movie_to_watchlist "Quentin Tarantino" "Pulp Fiction" 1994
 
 move_movie_to_beginning "Quentin Tarantino" "Pulp Fiction" 1994
 move_movie_to_end "Robert Zemeckis" "Forrest Gump" 1994
-move_movie_to_film_number "Nick Cassavetes" "The Notebook" 2004 2
+add_movie_to_watchlist "Nick Cassavetes" "The Notebook" 2004 "Romance" 123 7.8
+move_movie_to_film_number "Nick Cassavetes" "The Notebook" 2004 1
 swap_movies_in_watchlist 1 2
 
 get_all_movies_from_watchlist
@@ -585,7 +611,6 @@ get_movie_from_watchlist_by_film_number 1
 
 get_watchlist_length_duration
 
-watch_current_movie
 rewind_watchlist
 
 play_entire_watchlist
