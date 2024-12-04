@@ -104,6 +104,7 @@ delete_movie_by_id() {
 get_all_movies() {
   echo "Getting all movies in the watchlist..."
   response=$(curl -s -X GET "$BASE_URL/get-all-movies-from-catalog")
+  echo "Response: $response"
   if echo "$response" | grep -q '"status": "success"'; then
     echo "All movies retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
@@ -111,6 +112,7 @@ get_all_movies() {
       echo "$response" | jq .
     fi
   else
+    echo "BASE_URL is: $BASE_URL"
     echo "Failed to get movies."
     exit 1
   fi

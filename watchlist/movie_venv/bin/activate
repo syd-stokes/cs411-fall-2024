@@ -67,3 +67,6 @@ fi
 if [ -n "${BASH:-}" -o -n "${ZSH_VERSION:-}" ] ; then
     hash -r 2> /dev/null
 fi
+
+export PYTHONPATH=$PYTHONPATH:/Users/Syd/cs411-fall-2024/watchlist
+echo "PYTHONPATH is set to: $PYTHONPATH"

@@ -2,7 +2,7 @@
 
 # Path to the database file
 DB_PATH=${DB_PATH:-/app/data/movies.db}  # Default path if $DB_PATH is not set
-SQL_FILE="./create_movie_table.sql"
+SQL_FILE="/app/sql/create_movie_table.sql"
 
 # Check if the SQL file exists
 if [ ! -f "$SQL_FILE" ]; then
