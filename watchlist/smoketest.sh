@@ -93,19 +93,20 @@ login_user() {
   fi
 }
 
-# Function to log out a user
+# Function to update a user password
 update_user_password() {
-  echo "Logging out user..."
-  response=$(curl -s -X POST "$BASE_URL/update-password" -H "Content-Type: application/json" \
-    -d '{"username":"testuser"}')
-  if echo "$response" | grep -q '"message": "User testuser logged out successfully."'; then
-    echo "User logged out successfully."
+  echo "Updating user password..."
+  response=$(curl -s -X PUT "$BASE_URL/update-password" -H "Content-Type: application/json" \
+    -d '{"username":"testuser", "password":"newpassword123"}')
+  
+  if echo "$response" | grep -q '"status": "password updated"'; then
+    echo "Password updated successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Logout Response JSON:"
+      echo "Password Update Response JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to log out user."
+    echo "Failed to update user password."
     if [ "$ECHO_JSON" = true ]; then
       echo "Error Response JSON:"
       echo "$response" | jq .
