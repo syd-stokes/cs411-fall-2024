@@ -1,8 +1,0 @@
-DROP TABLE IF EXISTS user_info;
-
-CREATE TABLE user_info (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    salt TEXT NOT NULL,
-    hashpass TEXT NOT NULL,
-    UNIQUE(id)
-);
