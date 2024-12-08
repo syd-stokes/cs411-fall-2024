@@ -619,6 +619,88 @@ get_movie_leaderboard() {
   fi
 }
 
+######################################################
+#
+# TMDB API
+#
+######################################################
+
+get_movies_by_director() {
+  director=$1
+
+  echo "Fetching movies directed by: $director..."
+  response=$(curl -s -X GET "$BASE_URL/movies-by-director?director=$(echo $director | sed 's/ /%20/g')")
+  echo "Response: $response"
+
+  if echo "$response" | grep -q '"movies":'; then
+    echo "Movies by director retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Movies JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to fetch movies by director."
+    exit 1
+  fi
+}
+
+get_top_rated_movies() {
+  echo "Fetching top-rated movies..."
+  response=$(curl -s -X GET "$BASE_URL/top-rated-movies")
+  echo "Response: $response"
+
+  if echo "$response" | grep -q '"movies":'; then
+    echo "Top-rated movies retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Top-Rated Movies JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to fetch top-rated movies."
+    exit 1
+  fi
+}
+
+get_movie_details() {
+  movie_id=$1
+
+  echo "Fetching details for movie ID: $movie_id..."
+  response=$(curl -s -X GET "$BASE_URL/movie-details/$movie_id")
+  echo "Response: $response"
+
+  if echo "$response" | grep -q '"movie":'; then
+    echo "Movie details retrieved successfully for ID: $movie_id."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Movie Details JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to fetch movie details for ID: $movie_id."
+    exit 1
+  fi
+}
+
+search_movie_by_title() {
+  title=$1
+
+  echo "Searching for movies with title: $title..."
+  response=$(curl -s -X GET "$BASE_URL/search-movies?title=$(echo $title | sed 's/ /%20/g')")
+  echo "Response: $response"
+
+  if echo "$response" | grep -q '"movies":'; then
+    echo "Movies retrieved successfully for title: $title."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Movies JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to search for movies with title: $title."
+    exit 1
+  fi
+}
+
+
+
 
 # Health checks
 check_health
@@ -686,5 +768,17 @@ play_current_movie
 play_rest_of_watchlist
 
 get_movie_leaderboard
+
+get_movies_by_director "Christopher Nolan"
+get_movies_by_director "Quentin Tarantino"
+get_movies_by_director "Steven Spielberg"
+
+
+get_top_rated_movies
+
+get_movie_details 27205
+
+
+search_movie_by_title "Inception"
 
 echo "All tests passed successfully!"

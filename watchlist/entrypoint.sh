@@ -2,7 +2,7 @@
 
 # Load the environment variables from .env file
 if [ -f .env ]; then
-    export $(cat .env | xargs)
+    export $(grep -v '^#' .env | xargs)
 fi
 
 # Check if CREATE_DB is true, and run the database creation script if so

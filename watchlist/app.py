@@ -1,19 +1,27 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 from werkzeug.exceptions import BadRequest, Unauthorized
-
+import os
 from movie_collection.models import movie_model
 from movie_collection.models.watchlist_model import WatchlistModel
 from movie_collection.utils.sql_utils import check_database_connection, check_table_exists
 from movie_collection.models.user_model import Users
 from config import ProductionConfig
 from movie_collection.db import db
+from movie_collection.models.tmdb_api_model import TMDbAPI
+
+
+tmdb_api = TMDbAPI(api_key=os.getenv("TMDB_API_KEY"))
+
+\
 
 
 # Load environment variables from .env file
 load_dotenv()
 
 # app = Flask(__name__)
+
+ 
 
 # watchlist_model = WatchlistModel()
 def create_app(config_class=ProductionConfig):
@@ -480,6 +488,38 @@ def create_app(config_class=ProductionConfig):
         except Exception as e:
             app.logger.error(f"Error clearing the watchlist: {e}")
             return make_response(jsonify({'error': str(e)}), 500)
+
+    ############################################################
+    # 
+    # TMBD Management
+    #
+    ############################################################
+    @app.route('/api/movies-by-director', methods=['GET'])
+    def movies_by_director():
+        director_name = request.args.get('director')
+        if not director_name:
+            return jsonify({"error": "Director name is required"}), 400
+        movies = tmdb_api.get_movies_by_director(director_name)
+        return jsonify({"movies": movies})
+
+    @app.route('/api/top-rated-movies', methods=['GET'])
+    def top_rated_movies():
+        movies = tmdb_api.get_top_rated_movies()
+        return jsonify({"movies": movies})
+
+    @app.route('/api/search-movies', methods=['GET'])
+    def search_movies():
+        title = request.args.get('title')
+        if not title:
+            return jsonify({"error": "Movie title is required"}), 400
+        movies = tmdb_api.search_movie_by_title(title)
+        return jsonify({"movies": movies})
+
+    @app.route('/api/movie-details/<int:movie_id>', methods=['GET'])
+    def movie_details(movie_id):
+        details = tmdb_api.get_movie_details(movie_id)
+        return jsonify({"movie": details})
+
 
     ############################################################
     #

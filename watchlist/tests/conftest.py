@@ -1,4 +1,6 @@
 import pytest
+import sys
+import os
 from config import TestConfig
 from app import create_app
 from movie_collection.db import db

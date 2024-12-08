@@ -24,15 +24,5 @@ else
   echo "Virtual environment already exists. Activated."
 fi
 
-# # Set PYTHONPATH
-# export PYTHONPATH=$PYTHONPATH:/Users/Syd/cs411-fall-2024/watchlist
-# echo "PYTHONPATH is set to: $PYTHONPATH"
-# Set PYTHONPATH
-if [ -z "$PYTHONPATH" ]; then
-  export PYTHONPATH="/Users/Syd/cs411-fall-2024/watchlist"
-else
-  export PYTHONPATH="$PYTHONPATH:/Users/Syd/cs411-fall-2024/watchlist"
-fi
-echo "PYTHONPATH is set to: $PYTHONPATH"
 
 

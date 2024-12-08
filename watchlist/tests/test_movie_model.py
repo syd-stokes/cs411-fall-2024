@@ -408,7 +408,7 @@ def test_get_random_movie_empty_catalog(mock_cursor, mocker):
         get_random_movie()
 
     # Ensure that the random number was not called since there are no movies
-    mocker.patch("watchlist.movie_collection.models.movie_model.get_random").assert_not_called()
+    mocker.patch("movie_collection.models.movie_model.get_random").assert_not_called()
 
     # Ensure the SQL query was executed correctly
     expected_query = normalize_whitespace("SELECT id, director, title, year, genre, duration, rating, watch_count FROM movies WHERE deleted = FALSE")
