@@ -201,7 +201,7 @@ Run PyTest:
 pytest
 ```
 
-###Smoke Test: 
+### Smoke Tests: 
 Run:
 ```bash
 ./run_docker.sh 
