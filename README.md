@@ -6,7 +6,6 @@
 3. [Routes Documentation](#routes-documentation)
 4. [Setup Instructions](#setup-instructions)
 5. [Testing](#testing)
-6. [Contributing](#contributing)
 7. [License](#license)
 
 ---
