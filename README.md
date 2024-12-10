@@ -96,11 +96,8 @@ This project is a web application designed for managing a movie catalog and watc
 - **Request Type**: `POST`
 - **Purpose**: Create a new user account.
 - **Request Body**:
-  ```json
-  {
-    "username": "example_user",
-    "password": "secure_password"
-  }
+  - **username** (String): The username of the user account to create.
+  - **password** (String): The password of the user account to create.
 - **Response Format**: JSON
   - Success Response Example:
     - Code: 201
@@ -127,11 +124,8 @@ This project is a web application designed for managing a movie catalog and watc
 - **Request Type**: `POST`
 - **Purpose**: Authenticate a user.
 - **Request Body**:
-  ```json
-  {
-    "username": "example_user",
-    "password": "secure_password"
-  }
+  - **username** (String): The username of the user account to create.
+  - **password** (String): The password of the user account to create.
 - **Response Format**: JSON
   - Success Response Example:
     - Code: 200
@@ -156,11 +150,8 @@ This project is a web application designed for managing a movie catalog and watc
 - **Request Type**: `PUT`
 - **Purpose**: Update the password of an existing user.
 - **Request Body**:
-  ```json
-  {
-    "username": "example_user",
-    "password": "new_secure_password"
-  }
+  - **username** (String): The username of the user account to create.
+  - **password** (String): The password of the user account to create.
 - **Response Format**: JSON
   - Success Response Example:
     - Code: 200
@@ -188,54 +179,203 @@ This project is a web application designed for managing a movie catalog and watc
 - **Request Type**: `POST`
 - **Purpose**: Add a new movie to the catalog.
 - **Request Body**:
-  ```json
-  {
-    "director": "Example Director",
-    "title": "Example Title",
-    "year": 2023,
-    "genre": "Action",
-    "duration": 120,
-    "rating": 8.5
-  }
-- **Response**:
-  ```json=
-  {
-    "status": "success",
-    "movie": "Example Title"
-  }
+  - **director** (String): The name of the movie's director.
+  - **title** (String): The title of the movie.
+  - **year** (int): The year the movie was released.
+  - **genre** (String): The genre of the movie (e.g., Action, Drama, Comedy).
+  - **duration** (int): The duration of the movie in minutes.
+  - **rating** (float): The rating of the movie (e.g., IMDb rating).
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 201
+    - Content:
+    ```json=
+    {
+      "status": "success",
+      "movie": "Example Title"
+    }
+ - Example Request:
+    ```bash
+        curl -X POST http://localhost:5000/api/create-movie \
+        -H "Content-Type: application/json" \
+        -d '{"director": "Example Director", "title": "Example Title", "year": 2023, "genre": "Action", "duration": 120, "rating": 8.5}'
+    ```
+ - Example Response:
+     ```json
+     {
+      "status": "success", 
+      "movie": "Example Title"
+     }
   
+### Route: `/api/clear-catalog`
+- **Request Type**: `DELETE`
+- **Purpose**: Clear all movies in the catalog.
+- **Request Body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+      "status": "success", 
+      "message": "Catalog cleared successfully"
+    }
+ - Example Request:
+    ```bash
+        curl -X DELETE http://localhost:5000/api/clear-catalog
+    ```
+ - Example Response:
+     ```json
+     {
+      "status": "success", 
+      "message": "Catalog cleared successfully"
+     }
+
+### Route: `/api/delete-movie/<int:movie_id>`
+- **Request Type**: `DELETE`
+- **Purpose**: Delete a movie by its ID.
+- **Request Body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+      "status": "success", 
+      "message": "Movie deleted successfully"
+    }
+ - Example Request:
+    ```bash
+        curl -X DELETE http://localhost:5000/api/delete-movie/123
+    ```
+ - Example Response:
+     ```json
+     {
+      "status": "success", 
+      "message": "Movie deleted successfully"
+     }
+
+### Route: `/api/get-movie-from-catalog-by-id/<int:movie_id>`
+- **Request Type**: `GET`
+- **Purpose**: Retrieve a movie by its ID.
+- **Request Body**:
+  - **movie_id** (int): The ID of the movie to retrieve.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+  ```json=
+  { 
+    "status": "success", 
+    "movie": { 
+      "id": 123, 
+      "director": "Example Director", 
+      "title": "Example Title", 
+      "year": 2023, 
+      "genre": "Action", 
+      "duration": 120, 
+      "rating": 8.5 
+    } 
+  }
+ - Example Request:
+    ```bash
+        curl -X GET http://localhost:5000/api/get-movie-from-catalog-by-id/123
+    ```
+ - Example Response:
+     ```json
+    { 
+      "status": "success", 
+      "movie": { 
+        "id": 123, 
+        "director": "Example Director", 
+        "title": "Example Title", 
+        "year": 2023, 
+        "genre": "Action", 
+        "duration": 120, 
+        "rating": 8.5 
+      } 
+    }
+
 ### Route: `/api/get-all-movies-from-catalog`
 - **Request Type**: `GET`
 - **Purpose**: Retrieve all movies in the catalog.
-- **Query Parameters**:
-  - sort_by_rating: Optional, true to sort by rating.
-  - sort_by_watch_count: Optional, true to sort by watch count.
-- **Response**:
+- **Request Body**:
+  - **Query Parameters (Optional)**:
+      - **sort_by_rating** (bool): If true, sorts movies by rating in descending order.
+      - **sort_by_watch_count** (bool): If true, sorts movies by watch count in descending order.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
   ```json=
   {
-    "status": "success",
-    "movies": [ ... ] // List of movie objects
+      "status": "success", 
+      "movies": [ 
+        { 
+          "id": 123, 
+          "director": "Example Director", 
+          "title": "Example Title", 
+          "year": 2023, 
+          "genre": "Action", 
+          "duration": 120, 
+          "rating": 8.5 
+        }, 
+        ... 
+      ]
   }
-  
+ - Example Request:
+    ```bash
+        curl -X GET "http://localhost:5000/api/get-all-movies-from-catalog?sort_by_rating=true"
+    ```
+ - Example Response:
+     ```json
+    {
+        "status": "success", 
+        "movies": [ 
+          { 
+            "id": 123, 
+            "director": "Example Director", 
+            "title": "Example Title", 
+            "year": 2023, 
+            "genre": "Action", 
+            "duration": 120, 
+            "rating": 8.5 
+          }, 
+          ... 
+        ]
+    }
+
 ## **Watchlist Management**
 ### Route: `/api/add-movie-to-watchlist`
 - **Request Type**: `POST`
 - **Purpose**: Add a movie to the watchlist using compound key.
 - **Request Body**:
-  ```json
-  {
-    "director": "Example Director",
-    "title": "Example Title",
-    "year": 2023
-  }
-  ```
-- **Response**:
-  ```json=
-  {
-    "status": "success",
-    "message": "Movie added to watchlist"
-  }
-  ```
+  - **director** (String): The name of the movie's director.
+  - **title** (String): The title of the movie.
+  - **year** (int): The year the movie was released.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 201
+    - Content:
+    ```json=
+    {
+        "status": "success", 
+        "message": "Movie added to watchlist"
+    }
+ - Example Request:
+    ```bash
+        curl -X POST http://localhost:5000/api/add-movie-to-watchlist \
+        -H "Content-Type: application/json" \
+        -d '{"director": "Example Director", "title": "Example Title", "year": 2023}'
+    ```
+ - Example Response:
+     ```json
+     {
+      "status": "success", 
+      "message": "Movie added to watchlist"
+     }
 
 ---
 
