@@ -105,11 +105,11 @@ This project is a web application designed for managing a movie catalog and watc
   - Success Response Example:
     - Code: 201
     - Content:
-  ```json
-  {
-    "status": "user added",
-    "username": "example_user"
-  }
+    ```json
+    {
+      "status": "user added",
+      "username": "example_user"
+    }
  - Example Request:
     ```bash
         curl -X POST http://localhost:5000/api/create-account \
@@ -132,12 +132,26 @@ This project is a web application designed for managing a movie catalog and watc
     "username": "example_user",
     "password": "secure_password"
   }
-- **Response**:
-  ```json=
-  {
-    "message": "User example_user logged in successfully."
-  }
-  
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json
+    {
+     "message": "User example_user logged in successfully."
+    }
+ - Example Request:
+    ```bash
+        curl -X POST http://localhost:5000/api/login \ 
+        -H "Content-Type: application/json" \ 
+        -d '{"username": "example_user", "password": "secure_password"}'
+    ```
+ - Example Response:
+     ```json
+     {
+      "message": "User example_user logged in successfully."
+     }
+
 ### Route: `/api/update-password`
 - **Request Type**: `PUT`
 - **Purpose**: Update the password of an existing user.
