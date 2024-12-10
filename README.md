@@ -384,6 +384,380 @@ Overall, this application serves as a centralized hub for users to maintain and 
       "status": "success", 
       "message": "Movie added to watchlist"
      }
+     
+###Route: `/api/remove-movie-by-movie-id`
+- **Request Type**: `POST`
+- **Purpose**: Remove a movie from the watchlist by compound key (director, title, year)
+- **Request Body**:
+  - **director** (String): The name of the movie's director.
+  - **title** (String): The title of the movie.
+  - **year** (int): The year the movie was released.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+        "status": "success", 
+        "message": "Movie removed from watchlist"
+    }
+ - Example Request:
+    ```bash
+        curl -X POST http://localhost:5000/api/remove-movie-by-movie-id \
+        -H "Content-Type: application/json" \
+        -d '{"director": "Example Director", "title": "Example Title", "year": 2023}'
+    ```
+ - Example Response:
+     ```json
+     {
+      "status": "success", 
+      "message": "Movie removed from watchlist"
+     }
+
+###Route: `/api/remove-movie-by-film-number/<int:film_number>`
+- **Request Type**: `DELETE`
+- **Purpose**: Remove a movie from the watchlist by film number.
+- **Request Body**:
+  - **film_number** (int): The unique film number of the movie to remove.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+        "status": "success", 
+        "message": "Movie at film number {film_number} removed from watchlist"
+    }
+ - Example Request:
+    ```bash
+        curl -X POST http://localhost:5000/api/remove-movie-by-film-number-/123 \
+        -H "Content-Type: application/json" \
+          ```
+ - Example Response:
+     ```json
+     {
+      "status": "success", 
+      "message": "Movie at film number 123 removed from watchlist"
+     }
+
+
+
+###Route: `/api/clear-watchlist`
+- **Request Type**: `POST`
+- **Purpose**: clear all movies from the watchlist.
+- **Request Body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+        "status": "success", 
+        "message": "Watchlist cleared"
+    }
+ - Example Request:
+    ```bash
+        curl -X POST http://localhost:5000/api/clear-watchlist \
+        -H "Content-Type: application/json" \
+          ```
+ - Example Response:
+     ```json
+     {
+      "status": "success", 
+      "message": "Watchlist cleared"
+     }
+
+## **TMBD Management**
+
+###Route: `/api/movies-by-director`
+- **Request Type**: `GET`
+- **Purpose**: Retrieve a list of movies directed by a specific director
+- **Query Parameters**:
+  - **director** (String): The name of the director whose movies you want to fetch.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+    "movies": [
+        {
+            "title": "Example Movie 1",
+            "year": 2021
+        },
+        {
+            "title": "Example Movie 2",
+            "year": 2020
+        }
+    ]
+    }
+ - Example Request:
+    ```bash
+     curl -X GET"http://localhost:5000/api/movies-by-director?director=Example%20Director" \
+    -H "Content-Type: application/json"
+          ```
+ - Example Response:
+     ```json
+     {
+    "movies": [
+        {
+            "title": "Example Movie 1",
+            "year": 2021
+        },
+        {
+            "title": "Example Movie 2",
+            "year": 2020
+        }
+    ]
+    }
+
+
+###Route: `/api/top-rated-movies`
+- **Request Type**: `GET`
+- **Purpose**: Retrieve a list of top-rated movies.
+- **Request body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+    "movies": [
+        {
+            "title": "Example Movie 1",
+            "rating": 9.5,
+            "year": 2021
+        },
+        {
+            "title": "Example Movie 2",
+            "rating": 9.3,
+            "year": 2020
+        }
+    ]
+    }
+
+ - Example Request:
+    ```bash
+     curl -X GET http://localhost:5000/api/top-rated-movies \
+    -H "Content-Type: application/json"
+    ```
+ - Example Response:
+    ```json=
+    {
+    "movies": [
+        {
+            "title": "Example Movie 1",
+            "rating": 9.5,
+            "year": 2021
+        },
+        {
+            "title": "Example Movie 2",
+            "rating": 9.3,
+            "year": 2020
+        }
+    ]
+    }
+
+###Route: `/api/search-movies`
+- **Request Type**: `GET`
+- **Purpose**: Search for movies by title
+- **Query Parameters**:
+  - **title** (String): The title of the movie to search for.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+     {
+      "movies": [
+          {
+              "title": "Example Movie 1",
+              "year": 2021
+          },
+          {
+              "title": "Example Movie 2",
+              "year": 2019
+          }
+      ]
+    }
+ - Example Request:
+    ```bash
+   curl -X GET  "http://localhost:5000/api/search-movies?title=Example%20Title" \
+    -H "Content-Type: application/json"
+    ```
+ - Example Response:
+    ```json=
+    {
+    "movies": [
+        {
+            "title": "Example Movie 1",
+            "year": 2021
+        },
+        {
+            "title": "Example Movie 2",
+            "year": 2019
+        }
+    ]
+    }
+
+###Route: `/api/movie-details/<int:movie_id>`
+- **Request Type**: `GET`
+- **Purpose**: Retrieve details of a specific movie by its ID
+- ** Parameters**:
+  - **movie_id** (int): The unique ID of the movie to fetch details for.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+      "movie": {
+          "title": "Example Movie",
+          "year": 2021,
+          "rating": 8.7,
+          "runtime": 120,
+          "genres": ["Action", "Adventure"]
+      }
+    }
+ - Example Request:
+    ```bash
+   curl -X GET http://localhost:5000/api/movie-details/123 \
+    -H "Content-Type: application/json"
+          ```
+ - Example Response:
+   ```json=
+      {
+        "movie": {
+            "title": "Example Movie",
+            "year": 2021,
+            "rating": 8.7,
+            "runtime": 120,
+            "genres": ["Action", "Adventure"]
+        }
+    }
+
+
+##Play Watchlist
+
+###Route: `/api/play-current-movie`
+- **Request Type**: `POST`
+- **Purpose**: play the current movie in the watchlist
+- ** Request body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+     {
+        "status": "success",
+        "movie": {
+            "id": 123,
+            "director": "Example Director",
+            "title": "Example Movie",
+            "year": 2021,
+            "genre": "Drama",
+            "duration": 120,
+            "rating": 8.5
+        }
+    }
+
+
+ - Example Request:
+    ```bash
+   curl -X POST http://localhost:5000/api/play-current-movie \
+    -H "Content-Type: application/json"
+          ```
+ - Example Response:
+   ```json=
+   {
+      "status": "success",
+      "movie": {
+          "id": 123,
+          "director": "Example Director",
+          "title": "Example Movie",
+          "year": 2021,
+          "genre": "Drama",
+          "duration": 120,
+          "rating": 8.5
+      }
+  }
+
+###Route: `/api/play-entire-watchlist`
+- **Request Type**: `POST`
+- **Purpose**: play all movies in the watchlist
+- ** Request body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+     {
+        "status": "success"
+    }
+ - Example Request:
+    ```bash
+    curl -X POST http://localhost:5000/api/play-entire-watchlist \
+    -H "Content-Type: application/json"
+          ```
+ - Example Response:
+    ```json=
+   {
+      "status": "success"
+    }
+
+###Route: `/api/play-rest-of-watchlist`
+- **Request Type**: `POST`
+- **Purpose**: play the rest of the watchlist starting from the current track
+- ** Request body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+     {
+        "status": "success"
+    }
+ - Example Request:
+    ```bash
+    curl -X POST http://localhost:5000/api/play-rest-of-watchlist \
+    -H "Content-Type: application/json"
+          ```
+ - Example Response:
+    ```json=
+   {
+      "status": "success"
+    }
+
+###Route: `/api/rewind-watchlist`
+- **Request Type**: `POST`
+- **Purpose**: rewind the watchlist to the first movie
+- ** Request body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+     {
+        "status": "success"
+    }
+
+
+ - Example Request:
+    ```bash
+    curl -X POST http://localhost:5000/api/rewind-watchlist \
+    -H "Content-Type: application/json"
+          ```
+ - Example Response:
+    ```json=
+   {
+      "status": "success"
+    }
 
 ---
 
