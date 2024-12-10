@@ -161,12 +161,27 @@ This project is a web application designed for managing a movie catalog and watc
     "username": "example_user",
     "password": "new_secure_password"
   }
-- **Response**:
-  ```json=
-  {
-    "status": "password updated",
-    "username": "example_user"
-  }
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json
+    {
+     "status": "password updated", 
+     "username": "example_user"
+    }
+ - Example Request:
+    ```bash
+        curl -X PUT http://localhost:5000/api/update-password \
+        -H "Content-Type: application/json" \
+        -d '{"username": "example_user", "password": "new_secure_password"}'
+    ```
+ - Example Response:
+     ```json
+     {
+      "status": "password updated", 
+      "username": "example_user"
+     }
     
 ## **Movie Management**
 ### Route: `/api/create-movie`
