@@ -440,8 +440,6 @@ Overall, this application serves as a centralized hub for users to maintain and 
       "message": "Movie at film number 123 removed from watchlist"
      }
 
-
-
 ### Route: `/api/clear-watchlist`
 - **Request Type**: `POST`
 - **Purpose**: clear all movies from the watchlist.
@@ -469,7 +467,6 @@ Overall, this application serves as a centralized hub for users to maintain and 
      }
 
 ## **TMBD Management**
-
 ### Route: `/api/movies-by-director`
 - **Request Type**: `GET`
 - **Purpose**: Retrieve a list of movies directed by a specific director
@@ -537,7 +534,6 @@ Overall, this application serves as a centralized hub for users to maintain and 
           }
       ]
     }
-
  - Example Request:
     ```bash
      curl -X GET http://localhost:5000/api/top-rated-movies \
@@ -639,8 +635,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     }
 
 
-##Play Watchlist
-
+## Play Watchlist
 ### Route: `/api/play-current-movie`
 - **Request Type**: `POST`
 - **Purpose**: play the current movie in the watchlist
@@ -663,8 +658,6 @@ Overall, this application serves as a centralized hub for users to maintain and 
             "rating": 8.5
         }
     }
-
-
  - Example Request:
     ```bash
      curl -X POST http://localhost:5000/api/play-current-movie \
@@ -697,7 +690,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     ```json=
      {
         "status": "success"
-    }
+     }
  - Example Request:
     ```bash
       curl -X POST http://localhost:5000/api/play-entire-watchlist \
@@ -705,7 +698,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     ```
  - Example Response:
     ```json=
-   {
+    {
       "status": "success"
     }
 
@@ -721,7 +714,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     ```json=
      {
         "status": "success"
-    }
+     }
  - Example Request:
     ```bash
       curl -X POST http://localhost:5000/api/play-rest-of-watchlist \
@@ -746,8 +739,6 @@ Overall, this application serves as a centralized hub for users to maintain and 
      {
         "status": "success"
     }
-
-
  - Example Request:
     ```bash
       curl -X POST http://localhost:5000/api/rewind-watchlist \
