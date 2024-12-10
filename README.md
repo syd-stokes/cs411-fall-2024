@@ -634,7 +634,6 @@ Overall, this application serves as a centralized hub for users to maintain and 
         }
     }
 
-
 ## Play Watchlist
 ### Route: `/api/play-current-movie`
 - **Request Type**: `POST`
