@@ -266,19 +266,19 @@ This project is a web application designed for managing a movie catalog and watc
   - Success Response Example:
     - Code: 200
     - Content:
-  ```json=
-  { 
-    "status": "success", 
-    "movie": { 
-      "id": 123, 
-      "director": "Example Director", 
-      "title": "Example Title", 
-      "year": 2023, 
-      "genre": "Action", 
-      "duration": 120, 
-      "rating": 8.5 
-    } 
-  }
+    ```json=
+    { 
+      "status": "success", 
+      "movie": { 
+        "id": 123, 
+        "director": "Example Director", 
+        "title": "Example Title", 
+        "year": 2023, 
+        "genre": "Action", 
+        "duration": 120, 
+        "rating": 8.5 
+      } 
+    }
  - Example Request:
     ```bash
         curl -X GET http://localhost:5000/api/get-movie-from-catalog-by-id/123
@@ -309,22 +309,22 @@ This project is a web application designed for managing a movie catalog and watc
   - Success Response Example:
     - Code: 200
     - Content:
-  ```json=
-  {
-      "status": "success", 
-      "movies": [ 
-        { 
-          "id": 123, 
-          "director": "Example Director", 
-          "title": "Example Title", 
-          "year": 2023, 
-          "genre": "Action", 
-          "duration": 120, 
-          "rating": 8.5 
-        }, 
-        ... 
-      ]
-  }
+    ```json=
+    {
+        "status": "success", 
+        "movies": [ 
+          { 
+            "id": 123, 
+            "director": "Example Director", 
+            "title": "Example Title", 
+            "year": 2023, 
+            "genre": "Action", 
+            "duration": 120, 
+            "rating": 8.5 
+          }, 
+          ... 
+        ]
+    }
  - Example Request:
     ```bash
         curl -X GET "http://localhost:5000/api/get-all-movies-from-catalog?sort_by_rating=true"
