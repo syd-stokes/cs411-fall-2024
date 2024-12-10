@@ -44,12 +44,12 @@ This project is a web application designed for managing a movie catalog and watc
   - No parameters or body required.
 - **Response Format**: JSON
   - Success Response Example:
-   - Code: 200
-   - Content:
-  ```json
-  {
-    "status": "healthy"
-  }
+    - Code: 200
+    - Content:
+    ```json
+    {
+      "status": "healthy"
+    }
  - Example Request:
     ```bash
         curl -X GET http://localhost:5000/api/health
