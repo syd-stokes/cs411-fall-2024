@@ -92,7 +92,6 @@ This project is a web application designed for managing a movie catalog and watc
      }
 
 ## **User Management**
-
 ### Route: `/api/create-account`
 - **Request Type**: `POST`
 - **Purpose**: Create a new user account.
@@ -141,7 +140,6 @@ This project is a web application designed for managing a movie catalog and watc
   }
     
 ## **Movie Management**
-
 ### Route: `/api/create-movie`
 - **Request Type**: `POST`
 - **Purpose**: Add a new movie to the catalog.
@@ -176,7 +174,6 @@ This project is a web application designed for managing a movie catalog and watc
   }
   
 ## **Watchlist Management**
-
 ### Route: `/api/add-movie-to-watchlist`
 - **Request Type**: `POST`
 - **Purpose**: Add a movie to the watchlist using compound key.
