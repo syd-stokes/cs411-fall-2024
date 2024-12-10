@@ -18,7 +18,8 @@ This project is a web application designed for managing a movie catalog and a pe
   - Comprehensive movie catalog management tools, allowing users to add, delete, and retrieve movies with various filtering and sorting options.
   - A highly interactive watchlist management system for adding, removing, reordering, and playing movies.
   - Dynamic API interactions to fetch movie details, generate leaderboards based on ratings or watch counts, and retrieve personalized recommendations.
-This application serves as a centralized hub for users to maintain and explore their movie collections while offering seamless interaction with external movie databases for highly detailed data. It combines the flexibility of backend tools with dynamic data visualization, making it a powerful resource for movie enthusiasts!
+
+Overall, this application serves as a centralized hub for users to maintain and explore their movie collections while offering seamless interaction with external movie databases for highly detailed data.
 
 ---
 
