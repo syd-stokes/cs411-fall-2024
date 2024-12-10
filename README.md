@@ -11,7 +11,14 @@
 ---
 
 ## **Overview**
-This project is a web application designed for managing a movie catalog and watchlist. It features a robust backend using Flask, SQLite, and SQLAlchemy and integrates with the TMDB API for enriched movie data. The app provides functionalities for user management, movie management, and dynamic interactions with APIs.
+This project is a web application designed for managing a movie catalog and a personalized watchlist of favorite movies. It enables users to organize, explore, and interact with detailed movie data through an intuitive interface that integrates with the TMDB API. Our application features:
+  - A robust backend built using Flask, SQLite, and SQLAlchemy for efficient data storage and retrieval.
+  - Integration with the TMDB API to provide detailed and up-to-date movie metadata, such as ratings, genres, descriptions, and more.
+  - User management functionalities, including account creation, login, and secure password updates.
+  - Comprehensive movie catalog management tools, allowing users to add, delete, and retrieve movies with various filtering and sorting options.
+  - A highly interactive watchlist management system for adding, removing, reordering, and playing movies.
+  - Dynamic API interactions to fetch movie details, generate leaderboards based on ratings or watch counts, and retrieve personalized recommendations.
+This application serves as a centralized hub for users to maintain and explore their movie collections while offering seamless interaction with external movie databases for highly detailed data. It combines the flexibility of backend tools with dynamic data visualization, making it a powerful resource for movie enthusiasts!
 
 ---
 
