@@ -64,12 +64,33 @@ This project is a web application designed for managing a movie catalog and watc
 #### Route: `/api/db-check`
 - **Request Type**: `GET`
 - **Purpose**: Verifies database connection and table existence.
-- **Response**:
-  ```json
-  {
-    "database_status": "healthy"
-  }
-  
+- **Request Body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json
+    {
+      "database_status": "healthy"
+    }
+  - Error Response Example:
+    - Code: 404
+    - Content:
+    ```json
+    {
+      "error": "Database not reachable or movies table not found"
+    }
+ - Example Request:
+    ```bash
+        curl -X GET http://localhost:5000/api/db-check
+    ```
+ - Example Response:
+     ```json
+     {
+          "database_status": "healthy"
+     }
+
 ## **User Management**
 
 ### Route: `/api/create-account`
