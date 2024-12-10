@@ -101,12 +101,27 @@ This project is a web application designed for managing a movie catalog and watc
     "username": "example_user",
     "password": "secure_password"
   }
-- **Response**:
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 201
+    - Content:
   ```json
   {
     "status": "user added",
     "username": "example_user"
   }
+ - Example Request:
+    ```bash
+        curl -X POST http://localhost:5000/api/create-account \
+        -H "Content-Type: application/json" \
+        -d '{"username": "example_user", "password": "secure_password"}'
+    ```
+ - Example Response:
+     ```json
+     {
+       "status": "user added", 
+       "username": "example_user"
+     }
 
 ### Route: `/api/login`
 - **Request Type**: `POST`
