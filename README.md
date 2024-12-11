@@ -45,7 +45,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
 ## **Routes Documentation**
 
 ### **Health Checks**
-#### Route: `/api/health`
+### Route: `/api/health`
 - **Request Type**: `GET`
 - **Purpose**: Checks if the application is running.
 - **Request Body**:
@@ -69,7 +69,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
      }
 
 ### **Database Check**
-#### Route: `/api/db-check`
+### Route: `/api/db-check`
 - **Request Type**: `GET`
 - **Purpose**: Verifies database connection and table existence.
 - **Request Body**:
@@ -355,7 +355,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
         ]
     }
      
-### **Route**: /api/get-movie-from-catalog-by-compound-key
+### Route: `/api/get-movie-from-catalog-by-compound-key`
 - **Request Type**: `GET`
 - **Purpose**: Retrieve a movie by its compound key (director, title, year).
 - **Request Body**:
@@ -408,7 +408,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
 	  }
 	}
 
-### **Route**: /api/get-random-movie
+### Route: `/api/get-random-movie`
 - **Request Type**: `GET`
 - **Purpose**: Retrieve a random movie from the catalog.
 - **Request Body**:
@@ -861,7 +861,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
       "status": "success"
     }
     
-### Route: /api/get-all-movies-from-watchlist
+### Route: `/api/get-all-movies-from-watchlist`
 - **Request Type**: `GET`
 - **Purpose**: Retrieves all movies from the watchlist.
 - **Request Body**:
@@ -906,7 +906,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
       ]
     }
 
-### Route: /api/get-movie-from-watchlist-by-film-number/<film_number>
+### Route: `/api/get-movie-from-watchlist-by-film-number/<film_number>`
 - **Request Type**: `GET`
 - **Purpose**: Retrieves a specific movie from the watchlist by its film number.
 - **Request Body**:
@@ -948,7 +948,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     }
   }
 
-### Route: /api/get-current-movie
+### Route: `/api/get-current-movie`
 - **Request Type**: `GET`
 - **Purpose**: Retrieves the current movie being played in the watchlist.
 - **Request Body**:
@@ -990,7 +990,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
         }
     }
 
-### Route: /api/get-watchlist-length-duration
+### Route: `/api/get-watchlist-length-duration`
 - **Request Type**: `GET`
 - **Purpose**: Retrieves the total number of movies and the total duration of the watchlist.
 - **Request Body**:
@@ -1018,7 +1018,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "watchlist_duration": 600
   }
 
-### Route: /api/go-to-film-number/<film_number>
+### Route: `/api/go-to-film-number/<film_number>`
 - **Request Type**: `POST`
 - **Purpose**: Sets the watchlist to start playing from a specific film number.
 - **Request Body**:
@@ -1044,7 +1044,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "film_number": 3
   }
 
-### Route: /api/move-movie-to-beginning
+### Route: `/api/move-movie-to-beginning`
 - **Request Type**: `POST`
 - **Purpose**: Moves a specified movie to the beginning of the watchlist.
 - **Request Body**:
@@ -1076,7 +1076,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "movie": "Director Name - Movie Title"
   }
 
-### Route: /api/move-movie-to-end
+### Route: `/api/move-movie-to-end`
 - **Request Type**: `POST`
 - **Purpose**: Moves a specified movie to the end of the watchlist.
 - **Request Body**:
@@ -1108,7 +1108,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "movie": "Director Name - Movie Title"
   }
 
-### Route: /api/move-movie-to-film-number
+### Route: `/api/move-movie-to-film-number`
 - **Request Type**: `POST`
 - **Purpose**: Moves a specified movie to a specific position (film number) in the watchlist.
 - **Request Body**:
@@ -1144,7 +1144,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "film_number": 3
   }
 
-### Route: /api/swap-movies-in-watchlist
+### Route: `/api/swap-movies-in-watchlist`
 - **Request Type**: `POST`
 - **Purpose**: Swaps the positions of two movies in the watchlist by their film numbers.
 - **Request Body**:
@@ -1194,7 +1194,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     }
   }
 
-### Route: /api/movie-leaderboard
+### Route: `/api/movie-leaderboard`
 - **Request Type**: `GET`
 - **Purpose**: Retrieves a leaderboard of movies sorted by rating or watch count.
 - **Request Body**:
