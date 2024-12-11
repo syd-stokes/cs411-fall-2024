@@ -756,8 +756,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - No parameters or body required.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+    - Code: 200
+    - Content:
     ```json=
       { “message”: “All movies retrieved successfully.”,
 				“Movies” = [{
@@ -801,8 +801,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - **film_number** (int): The number of the movie to fetch details for.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+    - Code: 200
+    - Content:
     ```json=
       {
         “message” : “Movie retrieved successfully by film number.”,
@@ -843,8 +843,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - No parameters or body required.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+    - Code: 200
+    - Content:
       ```json=
       {
         “message”: “ Current movie retrieved successfully.”,
@@ -885,8 +885,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - No parameters or body required.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+    - Code: 200
+    - Content:
       ```json=
       {
         “message”: "Watchlist length and duration retrieved successfully.",
@@ -913,8 +913,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - **film_number** (int): The film number to set as the current movie.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+  	- Code: 200
+  	- Content:
       ```json=
       {
       “message”: “Moved to film number successfully ”
@@ -941,8 +941,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - **year** (int): The year the movie was released.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+    - Code: 200
+    - Content:
       ```json=
       {
         “message” : “Movie moved to the beginning successfully.”,
@@ -968,13 +968,13 @@ Overall, this application serves as a centralized hub for users to maintain and 
 - **Request Type**: `POST`
 - **Purpose**: Moves a specified movie to the end of the watchlist.
 - **Request Body**:
-	- **director** (String): The director of the movie.
+  - **director** (String): The director of the movie.
   - **title** (String): The title of the movie.
   - **year** (int): The year the movie was released.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+    - Code: 200
+    - Content:
       ```json=
       {
         “message” : "Movie moved to the end successfully."
@@ -1006,8 +1006,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - **film_number** (int): The new position in the watchlist to move the movie to
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+    - Code: 200
+    - Content:
       ```json=
 		{
   		“message” : Movie moved to film number successfully
@@ -1025,8 +1025,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
     }
 - Example Response:
   ```json=
-	{
-		“message” : Movie moved to film number successfully
+  {
+    “message” : Movie moved to film number successfully
     "status": "success",
     "movie": "Director Name - Movie Title",
     "film_number": 3
@@ -1040,24 +1040,24 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - **film_number_2** (int): The film number of the second movie.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
-      ```json=
-		{
-      "status": "success",
-      "swapped_movies": {
-        "film_1": {
-          "id": 1,
-          "director": "Director 1",
-          "title": "Movie 1"
-        },
-        "film_2": {
-          "id": 2,
-          "director": "Director 2",
-          "title": "Movie 2"
-        }
-      }
-    }
+    - Code: 200
+    - Content:
+    ```json=
+	{
+	      "status": "success",
+	      "swapped_movies": {
+	        "film_1": {
+	          "id": 1,
+	          "director": "Director 1",
+	          "title": "Movie 1"
+	        },
+	        "film_2": {
+	          "id": 2,
+	          "director": "Director 2",
+	          "title": "Movie 2"
+	        }
+	      }
+	    }
 - Example Request:
   ```bash
 	{
@@ -1091,8 +1091,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
       - **sort_by_watch_count** (bool): If true, sorts movies by watch count in descending order.
 - **Response Format**: JSON
   - Success Response Example:
-	  - Code: 200
-		- Content:
+    - Code: 200
+    - Content:
       ```json=
       {
         “message” : “Retrieved leaderboard successfully”,
