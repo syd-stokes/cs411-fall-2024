@@ -637,7 +637,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
 ## Play Watchlist
 ### Route: `/api/play-current-movie`
 - **Request Type**: `POST`
-- **Purpose**: play the current movie in the watchlist
+- **Purpose**: Play the current movie in the watchlist
 - **Request Body**:
   - No parameters or body required.
 - **Response Format**: JSON
@@ -679,7 +679,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
 
 ### Route: `/api/play-entire-watchlist`
 - **Request Type**: `POST`
-- **Purpose**: play all movies in the watchlist
+- **Purpose**: Play all movies in the watchlist
 - **Request Body**:
   - No parameters or body required.
 - **Response Format**: JSON
@@ -727,7 +727,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
 
 ### Route: `/api/rewind-watchlist`
 - **Request Type**: `POST`
-- **Purpose**: Rewind the watchlist to the first movie
+- **Purpose**: Rewinds the watchlist to the first movie
 - **Request Body**:
   - No parameters or body required.
 - **Response Format**: JSON
@@ -913,8 +913,8 @@ Overall, this application serves as a centralized hub for users to maintain and 
   - **film_number** (int): The film number to set as the current movie.
 - **Response Format**: JSON
   - Success Response Example:
-  	- Code: 200
-  	- Content:
+    - Code: 200
+    - Content:
       ```json=
       {
       “message”: “Moved to film number successfully ”
@@ -1009,19 +1009,19 @@ Overall, this application serves as a centralized hub for users to maintain and 
     - Code: 200
     - Content:
       ```json=
-		{
-  		“message” : Movie moved to film number successfully
-      "status": "success",
-      "movie": "Director Name - Movie Title",
-      "film_number": 3
-    }
+      {
+      	“message” : Movie moved to film number successfully
+      	"status": "success",
+      	"movie": "Director Name - Movie Title",
+      	"film_number": 3
+      }
 - Example Request:
   ```bash
-		{
-      "director": "Director Name",
-      "title": "Movie Title",
-      "year": 2023,
-      "film_number": 3
+    {
+     	"director": "Director Name",
+        "title": "Movie Title",
+        "year": 2023,
+        "film_number": 3
     }
 - Example Response:
   ```json=
