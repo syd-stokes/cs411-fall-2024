@@ -377,20 +377,20 @@ Overall, this application serves as a centralized hub for users to maintain and 
 	    "rating": 8.5
 	  }
 	}
- - Error Response Example (Missing Query Parameters):
-    - Code: 400
-    - Content:
-    ```json=
-    {
-      "error": "Missing required query parameters: director, title, year"
-    }
- - Error Response Example (Invalid Year):
-    - Code: 400
-    - Content:
-    ```json=
-    {
-      "error": "Year must be an integer"
-    }
+  - Error Response Example (Missing Query Parameters):
+     - Code: 400
+      - Content:
+      ```json=
+     {
+       "error": "Missing required query parameters: director, title, year"
+     }
+  - Error Response Example (Invalid Year):
+     - Code: 400
+     - Content:
+      ```json=
+     {
+       "error": "Year must be an integer"
+     }
  - Example Request:
     ```bash
         curl -X GET "http://localhost:5000/api/get-movie-from-catalog-by-compound-key?director=Example%20Director&title=Example%20Title&year=2023"
@@ -428,29 +428,29 @@ Overall, this application serves as a centralized hub for users to maintain and 
 	    "rating": 7.3
 	  }
 	}
- - Error Response Example:
-    - Code: 500
-    - Content:
-    ```json=
-    {
-      "error": "Error retrieving a random movie"
-    }
- - Example Request:
-    ```bash
-        curl -X GET http://localhost:5000/api/get-random-movie
-    ```
- - Example Response:
-    ```json=
+  - Error Response Example:
+     - Code: 500
+     - Content:
+     ```json=
      {
-	  "status": "success",
-	  "movie": {
-	    "director": "Example Director",
+       "error": "Error retrieving a random movie"
+     }
+- Example Request:
+  ```bash
+    curl -X GET http://localhost:5000/api/get-random-movie
+  ```
+- Example Response:
+  ```json=
+      {
+ 	  "status": "success",
+ 	  "movie": {
+ 	    "director": "Example Director",
 	    "title": "Random Title",
 	    "year": 2022,
-	    "genre": "Drama",
+ 	    "genre": "Drama",
 	    "rating": 7.3
-	  }
-	}
+ 	  }
+ 	}
 
 ## **Watchlist Management**
 ### Route: `/api/add-movie-to-watchlist`
