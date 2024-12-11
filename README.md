@@ -478,15 +478,19 @@ Overall, this application serves as a centralized hub for users to maintain and 
     - Content:
     ```json=
     {
-      "movies": [
-          {
-              "title": "Example Movie 1",
-              "year": 2021
-          },
-          {
-              "title": "Example Movie 2",
-              "year": 2020
-          }
+       "movies": [
+         {
+            "overview": "Example Overview",
+            "rating": 9.5,
+            "release_date": "2021-01-01",
+            "title": "Example Movie 1"
+         },
+         {
+            "overview": "Example Overview",
+            "rating": 8.7,
+            "release_date": "2020-01-01",
+            "title": "Example Movie 2"
+         }
       ]
     }
  - Example Request:
@@ -495,20 +499,23 @@ Overall, this application serves as a centralized hub for users to maintain and 
     -H "Content-Type: application/json"
     ```
  - Example Response:
-     ```json
-     {
-      "movies": [
-          {
-              "title": "Example Movie 1",
-              "year": 2021
-          },
-          {
-              "title": "Example Movie 2",
-              "year": 2020
-          }
+    ```json=
+    {
+       "movies": [
+         {
+            "overview": "Example Overview",
+            "rating": 9.5,
+            "release_date": "2021-01-01",
+            "title": "Example Movie 1"
+         },
+         {
+            "overview": "Example Overview",
+            "rating": 8.7,
+            "release_date": "2020-01-01",
+            "title": "Example Movie 2"
+         }
       ]
     }
-
 
 ### Route: `/api/top-rated-movies`
 - **Request Type**: `GET`
@@ -566,17 +573,21 @@ Overall, this application serves as a centralized hub for users to maintain and 
     - Code: 200
     - Content:
     ```json=
-     {
-      "movies": [
+    {
+       "movies": [
           {
-              "title": "Example Movie 1",
-              "year": 2021
+            "overview": "Example Overview",
+            "rating": 9.5,
+            "release_date": "2021-01-01",
+            "title": "Example Movie 1"
           },
           {
-              "title": "Example Movie 2",
-              "year": 2019
+            "overview": "Example Overview",
+            "rating": 8.7,
+            "release_date": "2020-01-01",
+            "title": "Example Movie 2"
           }
-      ]
+       ]
     }
  - Example Request:
     ```bash
@@ -586,16 +597,20 @@ Overall, this application serves as a centralized hub for users to maintain and 
  - Example Response:
     ```json=
     {
-      "movies": [
+       "movies": [
           {
-              "title": "Example Movie 1",
-              "year": 2021
+            "overview": "Example Overview",
+            "rating": 9.5,
+            "release_date": "2021-01-01",
+            "title": "Example Movie 1"
           },
           {
-              "title": "Example Movie 2",
-              "year": 2019
+            "overview": "Example Overview",
+            "rating": 8.7,
+            "release_date": "2020-01-01",
+            "title": "Example Movie 2"
           }
-      ]
+       ]
     }
 
 ### Route: `/api/movie-details/<int:movie_id>`
