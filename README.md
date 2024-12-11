@@ -354,6 +354,103 @@ Overall, this application serves as a centralized hub for users to maintain and 
           ... 
         ]
     }
+     
+### **Route**: /api/get-movie-from-catalog-by-compound-key
+- **Request Type**: `GET`
+- **Purpose**: Retrieve a movie by its compound key (director, title, year).
+- **Request Body**:
+  - **director** (String): The director's name.
+  - **title** (String): The movie title.
+  - **year** (Integer): The year the movie was released.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+	  "status": "success",
+	  "movie": {
+	    "director": "Example Director",
+	    "title": "Example Title",
+	    "year": 2023,
+	    "genre": "Action",
+	    "rating": 8.5
+	  }
+	}
+ - Error Response Example (Missing Query Parameters):
+    - Code: 400
+    - Content:
+    ```json=
+    {
+      "error": "Missing required query parameters: director, title, year"
+    }
+ - Error Response Example (Invalid Year):
+    - Code: 400
+    - Content:
+    ```json=
+    {
+      "error": "Year must be an integer"
+    }
+ - Example Request:
+    ```bash
+        curl -X GET "http://localhost:5000/api/get-movie-from-catalog-by-compound-key?director=Example%20Director&title=Example%20Title&year=2023"
+    ```
+ - Example Response:
+    ```json=
+    {
+	  "status": "success",
+	  "movie": {
+	    "director": "Example Director",
+	    "title": "Example Title",
+	    "year": 2023,
+	    "genre": "Action",
+	    "rating": 8.5
+	  }
+	}
+
+### **Route**: /api/get-random-movie
+- **Request Type**: `GET`
+- **Purpose**: Retrieve a random movie from the catalog.
+- **Request Body**:
+  - No parameters or body required.
+- **Response Format**: JSON
+  - Success Response Example:
+    - Code: 200
+    - Content:
+    ```json=
+    {
+	  "status": "success",
+	  "movie": {
+	    "director": "Example Director",
+	    "title": "Random Title",
+	    "year": 2022,
+	    "genre": "Drama",
+	    "rating": 7.3
+	  }
+	}
+ - Error Response Example:
+    - Code: 500
+    - Content:
+    ```json=
+    {
+      "error": "Error retrieving a random movie"
+    }
+ - Example Request:
+    ```bash
+        curl -X GET http://localhost:5000/api/get-random-movie
+    ```
+ - Example Response:
+    ```json=
+     {
+	  "status": "success",
+	  "movie": {
+	    "director": "Example Director",
+	    "title": "Random Title",
+	    "year": 2022,
+	    "genre": "Drama",
+	    "rating": 7.3
+	  }
+	}
 
 ## **Watchlist Management**
 ### Route: `/api/add-movie-to-watchlist`
@@ -809,7 +906,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
       ]
     }
 
-## Route: /api/get-movie-from-watchlist-by-film-number/<film_number>
+### Route: /api/get-movie-from-watchlist-by-film-number/<film_number>
 - **Request Type**: `GET`
 - **Purpose**: Retrieves a specific movie from the watchlist by its film number.
 - **Request Body**:
@@ -851,7 +948,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     }
   }
 
-## Route: /api/get-current-movie
+### Route: /api/get-current-movie
 - **Request Type**: `GET`
 - **Purpose**: Retrieves the current movie being played in the watchlist.
 - **Request Body**:
@@ -893,7 +990,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
         }
     }
 
-## Route: /api/get-watchlist-length-duration
+### Route: /api/get-watchlist-length-duration
 - **Request Type**: `GET`
 - **Purpose**: Retrieves the total number of movies and the total duration of the watchlist.
 - **Request Body**:
@@ -921,7 +1018,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "watchlist_duration": 600
   }
 
-## Route: /api/go-to-film-number/<film_number>
+### Route: /api/go-to-film-number/<film_number>
 - **Request Type**: `POST`
 - **Purpose**: Sets the watchlist to start playing from a specific film number.
 - **Request Body**:
@@ -947,7 +1044,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "film_number": 3
   }
 
-## Route: /api/move-movie-to-beginning
+### Route: /api/move-movie-to-beginning
 - **Request Type**: `POST`
 - **Purpose**: Moves a specified movie to the beginning of the watchlist.
 - **Request Body**:
@@ -979,7 +1076,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "movie": "Director Name - Movie Title"
   }
 
-## Route: /api/move-movie-to-end
+### Route: /api/move-movie-to-end
 - **Request Type**: `POST`
 - **Purpose**: Moves a specified movie to the end of the watchlist.
 - **Request Body**:
@@ -1011,7 +1108,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "movie": "Director Name - Movie Title"
   }
 
-## Route: /api/move-movie-to-film-number
+### Route: /api/move-movie-to-film-number
 - **Request Type**: `POST`
 - **Purpose**: Moves a specified movie to a specific position (film number) in the watchlist.
 - **Request Body**:
@@ -1047,7 +1144,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     "film_number": 3
   }
 
-## Route: /api/swap-movies-in-watchlist
+### Route: /api/swap-movies-in-watchlist
 - **Request Type**: `POST`
 - **Purpose**: Swaps the positions of two movies in the watchlist by their film numbers.
 - **Request Body**:
@@ -1097,7 +1194,7 @@ Overall, this application serves as a centralized hub for users to maintain and 
     }
   }
 
-## Route: /api/movie-leaderboard
+### Route: /api/movie-leaderboard
 - **Request Type**: `GET`
 - **Purpose**: Retrieves a leaderboard of movies sorted by rating or watch count.
 - **Request Body**:
